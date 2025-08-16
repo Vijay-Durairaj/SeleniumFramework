@@ -1,0 +1,47 @@
+package view;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+
+public class HomePage {
+
+    WebDriver driver;
+
+    public HomePage(WebDriver driver) {
+        this.driver = driver;
+        PageFactory.initElements(driver, this);
+    }
+
+    @FindBy(xpath = "//h1[contains(.,'Shop Name')]")
+    public WebElement shopNameHeader;
+
+    @FindBy(xpath = "//input[@name='search']")
+    public WebElement searchInput;
+
+    @FindBy(xpath = "(//span[@class='prod_price_amount '])[1]")
+    public WebElement priceTag;
+
+    public boolean getShopNameText() {
+        return shopNameHeader.isDisplayed();
+    }
+
+    public WebElement getShopNameHeader() {
+        return shopNameHeader;
+    }
+
+    public WebElement getSearchInput() {
+        return searchInput;
+    }
+
+    public WebElement getSearchKeyword(String keyword) {
+        return driver.findElement(By.xpath("(//div[@class='left-pane-results-container']/div/div/div[contains(.,'"+keyword+"')])[1]")); // Assuming the search button is the same as the input field
+    }
+
+    public WebElement getPriceTag() {
+        return priceTag;
+    }
+
+}
