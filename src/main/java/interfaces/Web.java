@@ -1,4 +1,4 @@
 package interfaces;
 
-public interface Web extends ShoppingCart {
+public interface Web extends IPlatformInterface {
 }

@@ -8,6 +8,6 @@ public class HomePage extends AbstractBaseTest {
 
     @Test
     public void searchKeywordTest() {
-        shoppingCart.searchForKeyword(ConfigReader.get("home.searchbox"));
+        platform.searchForKeyword(ConfigReader.get("home.searchbox"));
     }
 }

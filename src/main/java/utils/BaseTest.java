@@ -82,17 +82,4 @@ public class BaseTest {
         DriverFactory.quitDriver();
         driver = null;
     }
-
-    /**
-     * Sets up the WebDriver and page controllers before each test.
-     * This method is called before each test method to initialize the WebDriver instance and navigate to the login page.
-     */
-    @BeforeMethod(alwaysRun = true)
-    public void setup() {
-        driver = DriverFactory.getDriver();
-        driver.get(ConfigReader.get("login.url"));
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
-        loginController = new LoginController(driver);
-        homePageController = new HomePageController(driver);
-    }
 }

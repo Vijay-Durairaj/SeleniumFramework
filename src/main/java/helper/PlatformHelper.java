@@ -3,11 +3,12 @@ package helper;
 import controller.AndroidPlatform;
 import controller.WebPlatform;
 import controller.iOSPlatform;
+import interfaces.IPlatformInterface;
 import interfaces.ShoppingCart;
 
 public class PlatformHelper {
 
-    public static ShoppingCart getPlatformInstance(Platforms type) {
+    public static IPlatformInterface getPlatformInstance(Platforms type) {
         switch (type) {
             case ANDROID:
                 return new AndroidPlatform();
@@ -20,7 +21,7 @@ public class PlatformHelper {
         }
     }
 
-    public static ShoppingCart getCurrentPlatform() {
+    public static IPlatformInterface getCurrentPlatform() {
         return PlatformHelper.getPlatformInstance(ConfigurationHelper.getCurrentPlatform());
     }
 }

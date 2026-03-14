@@ -1,7 +1,7 @@
 package utils;
 
 import helper.PlatformHelper;
-import interfaces.ShoppingCart;
+import interfaces.IPlatformInterface;
 import org.testng.annotations.BeforeMethod;
 
 /**
@@ -10,10 +10,10 @@ import org.testng.annotations.BeforeMethod;
  */
 public abstract class AbstractBaseTest extends BaseTest {
 
-    protected ShoppingCart shoppingCart;
+    protected IPlatformInterface platform;
 
     @BeforeMethod(alwaysRun = true)
     public void initializePlatform() {
-        shoppingCart = PlatformHelper.getCurrentPlatform();
+        platform = PlatformHelper.getCurrentPlatform();
     }
 }

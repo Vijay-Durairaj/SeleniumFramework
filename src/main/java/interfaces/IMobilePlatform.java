@@ -1,4 +1,5 @@
 package interfaces;
 
-public interface IMobilePlatform extends ILoginPage, IHomePage, ShoppingCart {
+public interface IMobilePlatform extends IPlatformInterface {
+
 }
