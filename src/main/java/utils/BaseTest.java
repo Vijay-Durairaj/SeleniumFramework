@@ -37,19 +37,6 @@ public class BaseTest {
     }
 
     /**
-     * Sets up the WebDriver and navigates to the login page before each test method.
-     * This method initializes the LoginController and HomePageController instances.
-     */
-    @BeforeMethod
-    public void setup() {
-        driver = DriverFactory.getDriver();
-        driver.get(ConfigReader.get("login.url"));
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
-        loginController = new LoginController(driver);
-        homePageController = new HomePageController(driver);
-    }
-
-    /**
      * Creates a new test in the ExtentReports instance.
      * This method is called before each test method to initialize a new test entry in the report.
      *
@@ -92,9 +79,20 @@ public class BaseTest {
      */
     @AfterMethod
     public void teardown() {
-        if (driver != null) {
-            driver.quit();
-        }
+        DriverFactory.quitDriver();
+        driver = null;
     }
 
+    /**
+     * Sets up the WebDriver and page controllers before each test.
+     * This method is called before each test method to initialize the WebDriver instance and navigate to the login page.
+     */
+    @BeforeMethod(alwaysRun = true)
+    public void setup() {
+        driver = DriverFactory.getDriver();
+        driver.get(ConfigReader.get("login.url"));
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
+        loginController = new LoginController(driver);
+        homePageController = new HomePageController(driver);
+    }
 }

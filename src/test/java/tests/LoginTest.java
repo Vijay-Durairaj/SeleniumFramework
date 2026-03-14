@@ -1,19 +1,16 @@
 package tests;
+
 import model.User;
-import utils.BaseTest;
+import org.testng.annotations.Test;
+import utils.AbstractBaseTest;
 import utils.ConfigReader;
-import org.testng.annotations.*;
-import java.time.Duration;
 
-public class LoginTest extends BaseTest {
+public class LoginTest extends AbstractBaseTest {
 
-//    @Test
-//    public void validLoginTest() {
-//        User validUser = new User(ConfigReader.get("login.username"), ConfigReader.get("login.password"));
-//        loginController.loginAs(validUser);
-//        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
-//        homePageController.validateHomePage();
-//    }
-
-
+    @Test
+    public void validLoginTest() {
+        User validUser = new User(ConfigReader.get("login.username"), ConfigReader.get("login.password"));
+        shoppingCart.loginAs(validUser);
+        shoppingCart.validateHomePage();
+    }
 }

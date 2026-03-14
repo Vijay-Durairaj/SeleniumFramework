@@ -1,13 +1,13 @@
 package tests;
 
 import org.testng.annotations.Test;
-import utils.BaseTest;
+import utils.AbstractBaseTest;
 import utils.ConfigReader;
 
-public class HomePage extends BaseTest {
+public class HomePage extends AbstractBaseTest {
 
     @Test
     public void searchKeywordTest() {
-        homePageController.searchForKeyword(ConfigReader.get("home.searchbox"));
+        shoppingCart.searchForKeyword(ConfigReader.get("home.searchbox"));
     }
 }

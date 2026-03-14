@@ -17,13 +17,13 @@ public class LoginPage {
         PageFactory.initElements(driver, this);
     }
 
-    @FindBy(xpath = "//input[@name='username']")
+    @FindBy(id = "userEmail")
     private WebElement usernameInput;
 
-    @FindBy(xpath = "//input[@name='password']")
+    @FindBy(id = "userPassword")
     private WebElement passwordInput;
 
-    @FindBy(xpath = "//input[@name='signin']")
+    @FindBy(id = "login")
     private WebElement loginButton;
 
     @FindBy(xpath ="//input[@type='checkbox']")

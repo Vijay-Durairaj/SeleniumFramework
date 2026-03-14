@@ -1,28 +1,32 @@
 package controller;
 
-import interfaces.IHomePage;
+import interfaces.Web;
+import model.User;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-//import org.testng.Assert;
+import utils.DriverFactory;
 import view.HomePage;
 
 import java.time.Duration;
 
-public class HomePageController implements IHomePage {
+public class WebPlatform implements Web {
 
-    WebDriver driver;
+    protected WebDriver driver;
+    protected LoginController loginController;
     HomePage homePage;
 
-    /**
-     * Constructor for HomePageController.
-     * Initializes the WebDriver and HomePage instance.
-     *
-     * @param driver the WebDriver instance to control the browser
-     */
-    public HomePageController(WebDriver driver) {
-        this.driver = driver;
+
+    public  WebPlatform() {
+        driver = DriverFactory.getDriver();
         homePage = new HomePage(driver);
+        loginController = new LoginController(driver);
+    }
+
+    @Override
+    public void loginAs(User validUser) {
+        // DriverFactory resolves WEB LOCAL or WEB BROWSERSTACK from config.properties
+        loginController.loginAs(validUser);
     }
 
     @Override
@@ -47,6 +51,4 @@ public class HomePageController implements IHomePage {
 
         wait.until(ExpectedConditions.visibilityOf(homePage.getPriceTag()));
     }
-
-
 }

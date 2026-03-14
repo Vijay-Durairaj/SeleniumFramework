@@ -1,0 +1,26 @@
+# IntelliJ IDEA
+.idea/
+shelf/
+*.iml
+*.ipr
+*.iws
+
+# Maven / build output
+target/
+out/
+
+# Test execution output
+test-output/
+surefire-reports/
+failsafe-reports/
+
+# Reports
+allure-results/
+allure-report/
+
+# Local logs and temp files
+*.log
+*.tmp
+
+# macOS
+.DS_Store

@@ -15,7 +15,7 @@ public class HomePage {
         PageFactory.initElements(driver, this);
     }
 
-    @FindBy(xpath = "//h1[contains(.,'Shop Name')]")
+    @FindBy(xpath = "//button[contains(.,'HOME')]")
     public WebElement shopNameHeader;
 
     @FindBy(xpath = "//input[@name='search']")
@@ -43,5 +43,4 @@ public class HomePage {
     public WebElement getPriceTag() {
         return priceTag;
     }
-
 }
