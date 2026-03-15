@@ -21,7 +21,7 @@ Java UI automation framework using Selenium 4 with both TestNG and Cucumber exec
 - ExtentReports 5.0.9
 - Maven
 
-## Updated Framework Structure
+## Current Framework Structure
 
 ```text
 SeleniumFramework/
@@ -67,8 +67,8 @@ SeleniumFramework/
 |  |  |     `- TestRunner.java
 |  |  `- resources/
 |  |     |- config/
-| |  |     |  |- browserstack.yml
-| |  |     |  `- config.properties
+|  |     |  |- browserstack.yml
+|  |     |  `- config.properties
 |  |     `- features/
 |  |        `- loginpage.feature
 `- target/
@@ -79,9 +79,10 @@ SeleniumFramework/
 
 ### `helper` layer
 
-- `ConfigReader`: loads `config/config.properties` from classpath
-- `ConfigurationHelper`: resolves active platform (`platform` property, default fallback to `WEB`)
-- `PlatformHelper`: creates platform implementation instance (`WebPlatform`, `AndroidPlatform`, `iOSPlatform`)
+- `ConfigReader`: loads application test data from `config/config.properties`
+- `BrowserStackConfigReader`: loads execution mode, BrowserStack settings, and mobile capabilities from `config/browserstack.yml`
+- `ConfigurationHelper`: resolves the active platform from JVM args, environment variables, or `browserstack.yml`
+- `PlatformHelper`: creates the correct platform implementation (`WebPlatform`, `AndroidPlatform`, `iOSPlatform`)
 - `DriverFactory`: creates and caches one driver per thread via `ThreadLocal<WebDriver>`
 - `BaseTest` + `ExtentManager`: TestNG reporting lifecycle
 
@@ -89,15 +90,15 @@ SeleniumFramework/
 
 - `ILoginPage` defines login behavior: `loginAs(User user)`
 - `IHomePage` defines post-login/home behavior: `validateHomePage()` and `searchForKeyword(String keyword)`
-- `CommonAction` groups cross-flow actions currently shared across implementations: `launchApplication()`, `loginAs(User)`, `validateHomePage()`
-- `ShoppingCart` is an aggregate contract that extends `CommonAction` and `IHomePage`
+- `CommonAction` defines shared high-level actions such as `launchApplication()`, `loginAs(User)`, and `validateHomePage()`
+- `ShoppingCart` is currently an empty marker/extension interface
 - `IPlatformInterface` is the main abstraction consumed by tests and step definitions; it extends `ILoginPage`, `IHomePage`, `ShoppingCart`, and `CommonAction`
 - Platform-specific specializations sit on top of it:
   - `Web extends IPlatformInterface`
   - `IMobilePlatform extends IPlatformInterface`
   - `Android extends IMobilePlatform`
 
-> Note: some methods are intentionally repeated across the smaller interfaces and `CommonAction`/`ShoppingCart`. At runtime, consumers still interact through the single `IPlatformInterface` reference.
+> Note: `loginAs(...)` and `validateHomePage()` currently appear in multiple contracts. At runtime, consumers still interact through a single `IPlatformInterface` reference.
 
 ### `modules` layer
 
@@ -133,10 +134,8 @@ Instead, the flow is:
 ### Interface Hierarchy Flowchart
 
 ```mermaid
-flowchart TD
+flowchart LR
     ILoginPage --> IPlatformInterface
-    IHomePage --> ShoppingCart
-    CommonAction --> ShoppingCart
     IHomePage --> IPlatformInterface
     CommonAction --> IPlatformInterface
     ShoppingCart --> IPlatformInterface
@@ -147,8 +146,8 @@ flowchart TD
 
 ### How These Interfaces Are Organized
 
-- `ILoginPage`, `IHomePage`, and `CommonAction` are the base contracts.
-- `ShoppingCart` combines `IHomePage` and `CommonAction`.
+- `ILoginPage`, `IHomePage`, and `CommonAction` contain the current behavior contracts.
+- `ShoppingCart` is a placeholder interface for future cart-related features.
 - `IPlatformInterface` is the main contract used by tests and step definitions.
 - `Web`, `IMobilePlatform`, and `Android` are platform-specific extensions of that contract.
 
@@ -230,8 +229,9 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    Cfg["config.properties"] --> Ch["ConfigurationHelper"]
-    Jvm["-Dplatform / -Drun.remote"] --> Ch
+    Jvm["-Dplatform / -Drun.remote"] --> Ch["ConfigurationHelper"]
+    Env["PLATFORM / RUN_REMOTE"] --> Ch
+    Yaml["browserstack.yml"] --> Ch
     Ch --> Ph["PlatformHelper"]
     Ph --> Pi["IPlatformInterface instance"]
     Pi --> Df["DriverFactory.getDriver"]
@@ -272,15 +272,31 @@ mvn -Dtest=utils.TestRunner test
 
 ## Configuration
 
-File: `src/test/resources/config/config.properties`
+Files:
 
-Key runtime properties:
+- `src/test/resources/config/config.properties`
+- `src/test/resources/config/browserstack.yml`
 
-- `platform=web|android|ios`
-- `run.remote=true|false`
-- `login.url`, `login.username`, `login.password`
-- BrowserStack settings: `browserstack.*`
-- Mobile capabilities: `android.*`, `ios.*`
+### `config.properties`
+
+Keep only application test data here:
+
+- `login.url`
+- `login.username`
+- `login.password`
+- `home.searchbox`
+
+### `browserstack.yml`
+
+Keep execution and platform settings here:
+
+- `execution.platform=web|android|ios`
+- `execution.remote=true|false`
+- `credentials.username`, `credentials.accessKey`
+- `web.browser`, `web.browserVersion`, `web.os`, `web.osVersion`
+- `android.local.*`, `android.bstack.*`
+- `ios.local.*`, `ios.bstack.*`
+- `session.*`, `local.*`
 
 Override at runtime with JVM args:
 
@@ -297,6 +313,8 @@ export BROWSERSTACK_ACCESS_KEY="<your-key>"
 mvn test -Dplatform=web -Drun.remote=true
 ```
 
+You can keep default execution values in `browserstack.yml` and override them only when needed with JVM args or environment variables.
+
 ## Reports
 
 - Cucumber HTML report: `target/cucumber-reports.html`
@@ -307,6 +325,7 @@ mvn test -Dplatform=web -Drun.remote=true
 - `WebPlatform` has active business implementation.
 - `AndroidPlatform` and `iOSPlatform` contain TODO implementations for flow methods.
 - `AbstractStepDefinitions#getOrSaveData` is available for shared key/value data inside classes that extend it.
+- `ShoppingCart` is present in the interface model but does not yet define any cart-specific actions.
 
 ## How To Add New Coverage
 
