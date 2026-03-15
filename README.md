@@ -135,9 +135,9 @@ Instead, the flow is:
 ```mermaid
 flowchart TD
     subgraph Base_Contracts[Base contracts]
-        LP[ILoginPage\nloginAs(User)]
-        HP[IHomePage\nvalidateHomePage()\nsearchForKeyword(keyword)]
-        CA[CommonAction\nlaunchApplication()\nloginAs(User)\nvalidateHomePage()]
+        LP["ILoginPage<br/>loginAs(User)"]
+        HP["IHomePage<br/>validateHomePage()<br/>searchForKeyword(keyword)"]
+        CA["CommonAction<br/>launchApplication()<br/>loginAs(User)<br/>validateHomePage()"]
         SC[ShoppingCart]
     end
 
@@ -190,15 +190,15 @@ flowchart LR
     T2 --> A
 
     A -->|initializes| P[platform : IPlatformInterface]
-    A --> H[PlatformHelper.getCurrentPlatform()]
-    H --> C[ConfigurationHelper.getCurrentPlatform()]
+    A --> H["PlatformHelper.getCurrentPlatform()"]
+    H --> C["ConfigurationHelper.getCurrentPlatform()"]
     C --> SEL{platform value}
 
     SEL -->|web| WP[WebPlatform implements Web]
     SEL -->|android| AP[AndroidPlatform implements Android]
     SEL -->|ios| IPH[iOSPlatform implements IMobilePlatform]
 
-    WP --> D[DriverFactory.getDriver()]
+    WP --> D["DriverFactory.getDriver()"]
     AP --> D
     IPH --> D
 
@@ -217,52 +217,52 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    A[Start Test Execution] --> B{Entry Type}
+    A["Start Test Execution"] --> B{"Entry Type"}
 
-    B -->|TestNG| C[testng.xml or -Dtest=tests.LoginTest]
-    B -->|Cucumber| D[utils.TestRunner]
+    B -->|TestNG| C["testng.xml or -Dtest=tests.LoginTest"]
+    B -->|Cucumber| D["utils.TestRunner"]
 
-    C --> E[tests.LoginTest/tests.HomePage]
-    D --> F[loginpage.feature + LoginPageSteps]
+    C --> E["tests.LoginTest / tests.HomePage"]
+    D --> F["loginpage.feature + LoginPageSteps"]
 
-    E --> G[AbstractStepDefinitions constructor]
+    E --> G["AbstractStepDefinitions constructor"]
     F --> G
 
-    G --> H[PlatformHelper.getCurrentPlatform]
-    H --> I[ConfigurationHelper.getCurrentPlatform]
-    I --> J{platform value}
+    G --> H["PlatformHelper.getCurrentPlatform"]
+    H --> I["ConfigurationHelper.getCurrentPlatform"]
+    I --> J{"platform value"}
 
-    J -->|web| K[new WebPlatform]
-    J -->|android| L[new AndroidPlatform]
-    J -->|ios| M[new iOSPlatform]
+    J -->|web| K["new WebPlatform"]
+    J -->|android| L["new AndroidPlatform"]
+    J -->|ios| M["new iOSPlatform"]
 
-    K --> N[DriverFactory.getDriver]
+    K --> N["DriverFactory.getDriver"]
     L --> N
     M --> N
 
-    N --> O{run.remote}
-    O -->|false| P[Local WebDriver/Appium]
-    O -->|true| Q[BrowserStack RemoteWebDriver]
+    N --> O{"run.remote"}
+    O -->|false| P["Local WebDriver / Appium"]
+    O -->|true| Q["BrowserStack RemoteWebDriver"]
 
-    P --> R[Platform actions: launch/login/validate/search]
+    P --> R["Platform actions: launch / login / validate / search"]
     Q --> R
 
-    R --> S[Assertions + report output]
-    S --> T[DriverFactory.quitDriver on teardown]
+    R --> S["Assertions + report output"]
+    S --> T["DriverFactory.quitDriver on teardown"]
 ```
 
 ## Runtime Selection Flow (Platform + Driver)
 
 ```mermaid
 flowchart LR
-    Cfg[config.properties] --> Ch[ConfigurationHelper]
-    Jvm[-Dplatform / -Drun.remote] --> Ch
-    Ch --> Ph[PlatformHelper]
-    Ph --> Pi[IPlatformInterface instance]
-    Pi --> Df[DriverFactory.getDriver]
-    Df --> Rt{run.remote}
-    Rt -->|false| Loc[Local browser/Appium]
-    Rt -->|true| Bs[BrowserStack]
+    Cfg["config.properties"] --> Ch["ConfigurationHelper"]
+    Jvm["-Dplatform / -Drun.remote"] --> Ch
+    Ch --> Ph["PlatformHelper"]
+    Ph --> Pi["IPlatformInterface instance"]
+    Pi --> Df["DriverFactory.getDriver"]
+    Df --> Rt{"run.remote"}
+    Rt -->|false| Loc["Local browser / Appium"]
+    Rt -->|true| Bs["BrowserStack"]
 ```
 
 ## Test Execution Paths
