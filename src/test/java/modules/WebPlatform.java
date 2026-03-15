@@ -16,22 +16,33 @@ public class WebPlatform implements Web {
 
     protected WebDriver driver;
 
-    private final HomePage homePage;
-    private final LoginPage loginPage;
+    private HomePage homePage;
+    private LoginPage loginPage;
 
     public  WebPlatform() {
-        driver = DriverFactory.getDriver();
-        homePage = new HomePage(driver);
-        loginPage = new LoginPage(driver);
+    }
+
+    private void ensureInitialized() {
+        if (driver == null) {
+            driver = DriverFactory.getDriver();
+        }
+        if (homePage == null) {
+            homePage = new HomePage(driver);
+        }
+        if (loginPage == null) {
+            loginPage = new LoginPage(driver);
+        }
     }
 
     @Override
     public void launchApplication() {
+        ensureInitialized();
         driver.navigate().to(ConfigReader.get("login.url"));
     }
 
     @Override
     public void loginAs(User validUser) {
+        ensureInitialized();
         loginPage.enterUsername(validUser.getUsername());
         loginPage.enterPassword(validUser.getPassword());
         loginPage.clickLogin();
@@ -39,6 +50,7 @@ public class WebPlatform implements Web {
 
     @Override
     public void validateHomePage() {
+        ensureInitialized();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
         wait.until(ExpectedConditions.visibilityOf(homePage.getShopNameHeader()));
 
@@ -51,6 +63,7 @@ public class WebPlatform implements Web {
 
     @Override
     public void searchForKeyword(String keyword) {
+        ensureInitialized();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
         wait.until(ExpectedConditions.visibilityOf(homePage.getSearchInput()));
 
