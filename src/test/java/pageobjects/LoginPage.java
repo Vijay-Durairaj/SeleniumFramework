@@ -1,5 +1,6 @@
 package pageobjects;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -62,6 +63,11 @@ public class LoginPage {
     
     public void clickLogin() {
         wait.until(ExpectedConditions.elementToBeClickable(loginButton));
-        loginButton.click();
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", loginButton);
+        try {
+            loginButton.click();
+        } catch (org.openqa.selenium.ElementClickInterceptedException e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", loginButton);
+        }
     }
 }

@@ -42,11 +42,9 @@ jobs:
       # ── Run tests ─────────────────────────────────────────────────────────────
       - name: Run TestNG Selenium tests
         run: |
-          mvn -B clean test \
+          mvn -B -e clean test \
             -Dplatform=${PLATFORM} \
-            -Drun.remote=${RUN_REMOTE} \
-            -Dsurefire.printSummary=true \
-            -DtrimStackTrace=false
+            -Drun.remote=${RUN_REMOTE}
         env:
           CI: "true"
           # Pass CHROME_PATH so DriverFactory can set the binary location

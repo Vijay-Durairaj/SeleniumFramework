@@ -1,7 +1,9 @@
 package stepdefinitions;
 
+import helper.DriverFactory;
 import helper.PlatformHelper;
 import interfaces.IPlatformInterface;
+import org.testng.annotations.AfterMethod;
 
 import java.util.HashMap;
 
@@ -13,6 +15,11 @@ public abstract class AbstractStepDefinitions {
     public AbstractStepDefinitions() {
         platform = PlatformHelper.getCurrentPlatform();
         data = new HashMap<>();
+    }
+
+    @AfterMethod
+    public void teardown() {
+        DriverFactory.quitDriver();
     }
 
     protected String getOrSaveData(String key, String defaultValue) {
