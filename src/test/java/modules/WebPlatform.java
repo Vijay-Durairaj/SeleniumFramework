@@ -38,6 +38,7 @@ public class WebPlatform implements Web {
     public void launchApplication() {
         ensureInitialized();
         driver.navigate().to(ConfigReader.get("login.url"));
+        loginPage.waitUntilLoaded();
     }
 
     @Override

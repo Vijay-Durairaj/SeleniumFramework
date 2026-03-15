@@ -39,7 +39,22 @@ jobs:
 
       - name: Run TestNG Selenium tests
         run: |
-          xvfb-run --auto-servernum mvn -B clean test -Dplatform=${PLATFORM} -Drun.remote=${RUN_REMOTE}
+          xvfb-run --auto-servernum mvn -B clean test -Dplatform=${PLATFORM} -Drun.remote=${RUN_REMOTE} -Dsurefire.printSummary=true -DtrimStackTrace=false
+
+      - name: Print surefire failures in logs
+        if: failure()
+        run: |
+          echo "===== Surefire reports ====="
+          if [ -d target/surefire-reports ]; then
+            ls -la target/surefire-reports
+            for f in target/surefire-reports/*.txt target/surefire-reports/*.xml; do
+              [ -f "$f" ] || continue
+              echo "----- $f -----"
+              tail -n 200 "$f"
+            done
+          else
+            echo "No surefire-reports directory found."
+          fi
 
       - name: Upload test reports
         if: always()
