@@ -33,6 +33,7 @@ SeleniumFramework/
 |  |  |- java/
 |  |  |  |- helper/
 |  |  |  |  |- BaseTest.java
+|  |  |  |  |- BrowserStackConfigReader.java
 |  |  |  |  |- ConfigReader.java
 |  |  |  |  |- ConfigurationHelper.java
 |  |  |  |  |- DriverFactory.java
@@ -45,6 +46,7 @@ SeleniumFramework/
 |  |  |  |  |- IHomePage.java
 |  |  |  |  |- ILoginPage.java
 |  |  |  |  |- IMobilePlatform.java
+|  |  |  |  |- IOS.java
 |  |  |  |  |- IPlatformInterface.java
 |  |  |  |  |- ShoppingCart.java
 |  |  |  |  `- Web.java
@@ -97,6 +99,7 @@ SeleniumFramework/
   - `Web extends IPlatformInterface`
   - `IMobilePlatform extends IPlatformInterface`
   - `Android extends IMobilePlatform`
+  - `IOS extends IMobilePlatform`
 
 > Note: `loginAs(...)` and `validateHomePage()` currently appear in multiple contracts. At runtime, consumers still interact through a single `IPlatformInterface` reference.
 
@@ -142,6 +145,7 @@ flowchart LR
     IPlatformInterface --> Web
     IPlatformInterface --> IMobilePlatform
     IMobilePlatform --> Android
+    IMobilePlatform --> IOS
 ```
 
 ### How These Interfaces Are Organized
@@ -149,7 +153,8 @@ flowchart LR
 - `ILoginPage`, `IHomePage`, and `CommonAction` contain the current behavior contracts.
 - `ShoppingCart` is a placeholder interface for future cart-related features.
 - `IPlatformInterface` is the main contract used by tests and step definitions.
-- `Web`, `IMobilePlatform`, and `Android` are platform-specific extensions of that contract.
+- `Web`, `Android`, and `IOS` are the platform-specific views built on top of `IPlatformInterface`.
+- `IMobilePlatform` is the shared parent for the mobile-specific interfaces.
 
 ### Runtime Usage Flowchart
 
@@ -170,7 +175,7 @@ flowchart LR
 
     SEL -->|web| WP[WebPlatform implements Web]
     SEL -->|android| AP[AndroidPlatform implements Android]
-    SEL -->|ios| IPH[iOSPlatform implements IMobilePlatform]
+    SEL -->|ios| IPH[iOSPlatform implements IOS]
 
     WP --> D["DriverFactory.getDriver()"]
     AP --> D
@@ -186,6 +191,12 @@ flowchart LR
 - When `platform=web`, `PlatformHelper` returns `new WebPlatform()`
 - The step definition calls `platform.launchApplication()` and `platform.loginAs(...)`
 - `WebPlatform` executes the action using `LoginPage`, `HomePage`, and `DriverFactory`
+
+For mobile routing:
+
+- `platform=android` returns `AndroidPlatform implements Android`
+- `platform=ios` returns `iOSPlatform implements IOS`
+- both mobile interfaces still flow through the same `IPlatformInterface` reference used by tests and step definitions
 
 ## End-to-End Execution Flowchart
 

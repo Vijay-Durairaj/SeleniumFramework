@@ -4,8 +4,9 @@ import interfaces.IMobilePlatform;
 import model.User;
 import org.openqa.selenium.WebDriver;
 import helper.DriverFactory;
+import interfaces.IOS;
 
-public class iOSPlatform implements IMobilePlatform {
+public class iOSPlatform implements IOS {
 
     protected WebDriver driver;
 
