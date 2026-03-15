@@ -1,3 +1,4 @@
+# .github/workflows/run-tests-on-push.yml
 name: Run Selenium Tests on Push
 
 on:
@@ -15,7 +16,7 @@ jobs:
 
     env:
       PLATFORM: web
-      RUN_REMOTE: false
+      RUN_REMOTE: "false"
 
     steps:
       - name: Checkout repository
@@ -28,19 +29,33 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Install Google Chrome
-        uses: browser-actions/setup-chrome@v1
-
-      - name: Show tool versions
+      # ── Chrome setup ─────────────────────────────────────────────────────────
+      # ubuntu-latest ships with Google Chrome pre-installed.
+      # We install the matching ChromeDriver via WebDriverManager in DriverFactory,
+      # so we do NOT need browser-actions/setup-chrome — it causes path conflicts.
+      - name: Verify Chrome installation
         run: |
-          java -version
-          mvn -version
-          google-chrome --version || chrome --version || true
+          google-chrome --version
+          which google-chrome
+          echo "CHROME_PATH=$(which google-chrome)" >> $GITHUB_ENV
 
+      # ── Run tests ─────────────────────────────────────────────────────────────
       - name: Run TestNG Selenium tests
         run: |
-          xvfb-run --auto-servernum mvn -B clean test -Dplatform=${PLATFORM} -Drun.remote=${RUN_REMOTE} -Dsurefire.printSummary=true -DtrimStackTrace=false
+          mvn -B clean test \
+            -Dplatform=${PLATFORM} \
+            -Drun.remote=${RUN_REMOTE} \
+            -Dsurefire.printSummary=true \
+            -DtrimStackTrace=false
+        env:
+          CI: "true"
+          # Pass CHROME_PATH so DriverFactory can set the binary location
+          CHROME_PATH: ${{ env.CHROME_PATH }}
+          # Uncomment below if your app needs real credentials stored as secrets:
+          # LOGIN_USERNAME: ${{ secrets.LOGIN_USERNAME }}
+          # LOGIN_PASSWORD: ${{ secrets.LOGIN_PASSWORD }}
 
+      # ── Debug output on failure ───────────────────────────────────────────────
       - name: Print surefire failures in logs
         if: failure()
         run: |
@@ -56,12 +71,14 @@ jobs:
             echo "No surefire-reports directory found."
           fi
 
+      # ── Artifacts ─────────────────────────────────────────────────────────────
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: selenium-test-artifacts
           path: |
-            target/
+            target/surefire-reports/
+            target/cucumber-reports.html
+            target/extent-reports/
           if-no-files-found: ignore
-

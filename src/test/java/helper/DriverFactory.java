@@ -3,6 +3,8 @@ package helper;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -65,7 +67,18 @@ public class DriverFactory {
 
     private static WebDriver createLocalWebDriver() {
         WebDriverManager.chromedriver().setup();
-        WebDriver driver = WebDriverManager.chromedriver().create();
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--remote-allow-origins=*");
+
+        // Run headless when CI env variable is set (GitHub Actions sets CI=true)
+        if ("true".equalsIgnoreCase(System.getenv("CI"))) {
+            options.addArguments("--headless=new");
+            options.addArguments("--window-size=1920,1080");
+        }
+
+        WebDriver driver = new ChromeDriver(options);
         driver.manage().window().maximize();
         return driver;
     }
