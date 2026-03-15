@@ -134,48 +134,23 @@ Instead, the flow is:
 
 ```mermaid
 flowchart TD
-    subgraph Base_Contracts[Base contracts]
-        LP["ILoginPage<br/>loginAs(User)"]
-        HP["IHomePage<br/>validateHomePage()<br/>searchForKeyword(keyword)"]
-        CA["CommonAction<br/>launchApplication()<br/>loginAs(User)<br/>validateHomePage()"]
-        SC[ShoppingCart]
-    end
-
-    CA -->|extends into| SC
-    HP -->|extends into| SC
-
-    subgraph Platform_Contract[Unified platform contract]
-        PI[IPlatformInterface]
-    end
-
-    LP -->|composed into| PI
-    HP -->|composed into| PI
-    CA -->|composed into| PI
-    SC -->|composed into| PI
-
-    subgraph Platform_Specializations[Platform specializations]
-        WEB[Web]
-        MOBILE[IMobilePlatform]
-        ANDROID[Android]
-    end
-
-    PI -->|extended by| WEB
-    PI -->|extended by| MOBILE
-    MOBILE -->|extended by| ANDROID
+    ILoginPage --> IPlatformInterface
+    IHomePage --> ShoppingCart
+    CommonAction --> ShoppingCart
+    IHomePage --> IPlatformInterface
+    CommonAction --> IPlatformInterface
+    ShoppingCart --> IPlatformInterface
+    IPlatformInterface --> Web
+    IPlatformInterface --> IMobilePlatform
+    IMobilePlatform --> Android
 ```
 
 ### How These Interfaces Are Organized
 
-- **Small capability interfaces**
-  - `ILoginPage` isolates login behavior.
-  - `IHomePage` isolates home page validation and search behavior.
-- **Shared action grouping**
-  - `CommonAction` keeps high-level actions that can be reused across platform flows.
-  - `ShoppingCart` currently acts as a composite interface by inheriting from `CommonAction` and `IHomePage`.
-- **Single consumer-facing entry point**
-  - `IPlatformInterface` combines the full contract so the rest of the framework can hold a single `platform` reference.
-- **Platform markers / specialization**
-  - `Web`, `IMobilePlatform`, and `Android` allow the framework to express platform type without changing the test-facing API.
+- `ILoginPage`, `IHomePage`, and `CommonAction` are the base contracts.
+- `ShoppingCart` combines `IHomePage` and `CommonAction`.
+- `IPlatformInterface` is the main contract used by tests and step definitions.
+- `Web`, `IMobilePlatform`, and `Android` are platform-specific extensions of that contract.
 
 ### Runtime Usage Flowchart
 
