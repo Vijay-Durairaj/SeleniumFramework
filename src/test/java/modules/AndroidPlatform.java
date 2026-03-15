@@ -1,9 +1,9 @@
-package controller;
+package modules;
 
 import interfaces.Android;
 import model.User;
 import org.openqa.selenium.WebDriver;
-import utils.DriverFactory;
+import helper.DriverFactory;
 
 public class AndroidPlatform implements Android {
 
@@ -20,6 +20,11 @@ public class AndroidPlatform implements Android {
     @Override
     public void loginAs(User user) {
         // TODO: implement Android login flow using getDriver()
+    }
+
+    @Override
+    public void launchApplication() {
+
     }
 
     @Override

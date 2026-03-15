@@ -1,32 +1,40 @@
-package controller;
+package modules;
 
+import helper.ConfigReader;
 import interfaces.Web;
 import model.User;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import utils.DriverFactory;
-import view.HomePage;
+import pageobjects.LoginPage;
+import helper.DriverFactory;
+import pageobjects.HomePage;
 
 import java.time.Duration;
 
 public class WebPlatform implements Web {
 
     protected WebDriver driver;
-    protected LoginController loginController;
-    HomePage homePage;
 
+    private final HomePage homePage;
+    private final LoginPage loginPage;
 
     public  WebPlatform() {
         driver = DriverFactory.getDriver();
         homePage = new HomePage(driver);
-        loginController = new LoginController(driver);
+        loginPage = new LoginPage(driver);
+    }
+
+    @Override
+    public void launchApplication() {
+        driver.navigate().to(ConfigReader.get("login.url"));
     }
 
     @Override
     public void loginAs(User validUser) {
-        // DriverFactory resolves WEB LOCAL or WEB BROWSERSTACK from config.properties
-        loginController.loginAs(validUser);
+        loginPage.enterUsername(validUser.getUsername());
+        loginPage.enterPassword(validUser.getPassword());
+        loginPage.clickLogin();
     }
 
     @Override

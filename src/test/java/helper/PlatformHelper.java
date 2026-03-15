@@ -1,10 +1,9 @@
 package helper;
 
-import controller.AndroidPlatform;
-import controller.WebPlatform;
-import controller.iOSPlatform;
+import modules.AndroidPlatform;
+import modules.WebPlatform;
+import modules.iOSPlatform;
 import interfaces.IPlatformInterface;
-import interfaces.ShoppingCart;
 
 public class PlatformHelper {
 

@@ -1,9 +1,9 @@
-package controller;
+package modules;
 
 import interfaces.IMobilePlatform;
 import model.User;
 import org.openqa.selenium.WebDriver;
-import utils.DriverFactory;
+import helper.DriverFactory;
 
 public class iOSPlatform implements IMobilePlatform {
 
@@ -19,7 +19,12 @@ public class iOSPlatform implements IMobilePlatform {
 
     @Override
     public void loginAs(User user) {
-        // TODO: implement iOS login flow using getDriver()
+
+    }
+
+    @Override
+    public void launchApplication() {
+
     }
 
     @Override

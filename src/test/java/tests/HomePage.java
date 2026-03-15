@@ -1,13 +1,15 @@
 package tests;
 
+import helper.ConfigReader;
 import org.testng.annotations.Test;
-import utils.AbstractBaseTest;
-import utils.ConfigReader;
+import stepdefinitions.AbstractStepDefinitions;
 
-public class HomePage extends AbstractBaseTest {
+public class HomePage extends AbstractStepDefinitions {
 
     @Test
     public void searchKeywordTest() {
+        platform.launchApplication();
         platform.searchForKeyword(ConfigReader.get("home.searchbox"));
     }
 }
+

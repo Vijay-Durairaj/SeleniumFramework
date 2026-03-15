@@ -3,8 +3,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.mvc.framework</groupId>
-    <artifactId>mvc-framework</artifactId>
+    <groupId>com.selenium.framework</groupId>
+    <artifactId>SeleniumFramework</artifactId>
     <version>1.0-SNAPSHOT</version>
     <dependencies>
         <dependency>
@@ -27,6 +27,18 @@
             <groupId>com.aventstack</groupId>
             <artifactId>extentreports</artifactId>
             <version>5.0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>7.15.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit</artifactId>
+            <version>7.15.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

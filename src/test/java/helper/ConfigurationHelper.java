@@ -1,7 +1,5 @@
 package helper;
 
-import utils.ConfigReader;
-
 public class ConfigurationHelper {
 
     public static Platforms getCurrentPlatform() {

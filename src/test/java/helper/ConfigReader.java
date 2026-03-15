@@ -1,4 +1,4 @@
-package utils;
+package helper;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,7 +9,7 @@ public class ConfigReader {
     private static final Properties properties = new Properties();
 
     static {
-        try (InputStream classpathStream = ConfigReader.class.getClassLoader().getResourceAsStream("config.properties")) {
+        try (InputStream classpathStream = ConfigReader.class.getClassLoader().getResourceAsStream("config/config.properties")) {
             if (classpathStream != null) {
                 properties.load(classpathStream);
             } else {
