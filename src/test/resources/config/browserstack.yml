@@ -1,0 +1,55 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Framework + BrowserStack Configuration
+# All values can be overridden at runtime:
+#   JVM arg  →  -Dbrowserstack.<section>.<key>=value
+#   Env var  →  see the comment next to each key below
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Execution mode
+execution:
+  platform: web       # web | android | ios  | env: PLATFORM   | jvm: -Dplatform
+  remote: false       # false = local | true = BrowserStack | env: RUN_REMOTE | jvm: -Drun.remote
+
+# BrowserStack Credentials
+# Prefer environment variables so credentials are never committed to source control
+credentials:
+  username: ""          # env: BROWSERSTACK_USERNAME   | jvm: -Dbrowserstack.credentials.username
+  accessKey: ""         # env: BROWSERSTACK_ACCESS_KEY | jvm: -Dbrowserstack.credentials.accessKey
+
+# Web browser settings (BrowserStack sessions only)
+web:
+  browser: Chrome           # env: BROWSERSTACK_BROWSER         | jvm: -Dbrowserstack.web.browser
+  browserVersion: latest    # env: BROWSERSTACK_BROWSER_VERSION | jvm: -Dbrowserstack.web.browserVersion
+  os: Windows               # env: BROWSERSTACK_OS              | jvm: -Dbrowserstack.web.os
+  osVersion: "11"           # env: BROWSERSTACK_OS_VERSION      | jvm: -Dbrowserstack.web.osVersion
+
+# Session metadata (shown in BrowserStack Automate dashboard)
+session:
+  projectName: SeleniumFramework    # env: BROWSERSTACK_PROJECT_NAME | jvm: -Dbrowserstack.session.projectName
+  buildName: Local Build            # env: BROWSERSTACK_BUILD_NAME   | jvm: -Dbrowserstack.session.buildName
+  sessionName: Login Smoke          # env: BROWSERSTACK_SESSION_NAME | jvm: -Dbrowserstack.session.sessionName
+
+# BrowserStack Local tunnel
+local:
+  enabled: false      # env: BROWSERSTACK_LOCAL            | jvm: -Dbrowserstack.local.enabled
+  identifier: ""      # env: BROWSERSTACK_LOCAL_IDENTIFIER | jvm: -Dbrowserstack.local.identifier
+
+# Android — local Appium + BrowserStack remote
+android:
+  local:
+    deviceName: emulator-5554       # local Appium device
+    platformVersion: "13.0"         # local Appium OS version
+    browserName: Chrome             # local Appium browser
+  bstack:
+    deviceName: Samsung Galaxy S23  # env: BSTACK_ANDROID_DEVICE  | jvm: -Dbrowserstack.android.bstack.deviceName
+    osVersion: "13.0"               # env: BSTACK_ANDROID_VERSION | jvm: -Dbrowserstack.android.bstack.osVersion
+
+# iOS — local Appium + BrowserStack remote
+ios:
+  local:
+    deviceName: iPhone 15           # local Appium device
+    platformVersion: "17.0"         # local Appium OS version
+    browserName: Safari             # local Appium browser
+  bstack:
+    deviceName: iPhone 15           # env: BSTACK_IOS_DEVICE  | jvm: -Dbrowserstack.ios.bstack.deviceName
+    osVersion: "17"                 # env: BSTACK_IOS_VERSION | jvm: -Dbrowserstack.ios.bstack.osVersion

@@ -67,7 +67,8 @@ SeleniumFramework/
 |  |  |     `- TestRunner.java
 |  |  `- resources/
 |  |     |- config/
-|  |     |  `- config.properties
+| |  |     |  |- browserstack.yml
+| |  |     |  `- config.properties
 |  |     `- features/
 |  |        `- loginpage.feature
 `- target/
@@ -86,8 +87,17 @@ SeleniumFramework/
 
 ### `interfaces` layer
 
-- `IPlatformInterface` is the central contract used by tests/steps
-- Platform-specific interfaces (`Web`, `Android`, `IMobilePlatform`) extend the common contract
+- `ILoginPage` defines login behavior: `loginAs(User user)`
+- `IHomePage` defines post-login/home behavior: `validateHomePage()` and `searchForKeyword(String keyword)`
+- `CommonAction` groups cross-flow actions currently shared across implementations: `launchApplication()`, `loginAs(User)`, `validateHomePage()`
+- `ShoppingCart` is an aggregate contract that extends `CommonAction` and `IHomePage`
+- `IPlatformInterface` is the main abstraction consumed by tests and step definitions; it extends `ILoginPage`, `IHomePage`, `ShoppingCart`, and `CommonAction`
+- Platform-specific specializations sit on top of it:
+  - `Web extends IPlatformInterface`
+  - `IMobilePlatform extends IPlatformInterface`
+  - `Android extends IMobilePlatform`
+
+> Note: some methods are intentionally repeated across the smaller interfaces and `CommonAction`/`ShoppingCart`. At runtime, consumers still interact through the single `IPlatformInterface` reference.
 
 ### `modules` layer
 
@@ -108,6 +118,100 @@ SeleniumFramework/
 ### `tests` layer
 
 - TestNG tests (`LoginTest`, `HomePage`) directly invoke `platform` methods
+
+## Interface Organization
+
+The project uses a **contract-first design** so that tests and Cucumber step definitions never directly depend on `WebPlatform`, `AndroidPlatform`, or `iOSPlatform`.
+
+Instead, the flow is:
+
+1. Tests/steps work with `IPlatformInterface`
+2. `PlatformHelper` resolves the active platform at runtime
+3. A concrete module (`WebPlatform`, `AndroidPlatform`, or `iOSPlatform`) is returned
+4. That module fulfills the interface contract and delegates UI work to page objects and driver code
+
+### Interface Hierarchy Flowchart
+
+```mermaid
+flowchart TD
+    subgraph Base_Contracts[Base contracts]
+        LP[ILoginPage\nloginAs(User)]
+        HP[IHomePage\nvalidateHomePage()\nsearchForKeyword(keyword)]
+        CA[CommonAction\nlaunchApplication()\nloginAs(User)\nvalidateHomePage()]
+        SC[ShoppingCart]
+    end
+
+    CA -->|extends into| SC
+    HP -->|extends into| SC
+
+    subgraph Platform_Contract[Unified platform contract]
+        PI[IPlatformInterface]
+    end
+
+    LP -->|composed into| PI
+    HP -->|composed into| PI
+    CA -->|composed into| PI
+    SC -->|composed into| PI
+
+    subgraph Platform_Specializations[Platform specializations]
+        WEB[Web]
+        MOBILE[IMobilePlatform]
+        ANDROID[Android]
+    end
+
+    PI -->|extended by| WEB
+    PI -->|extended by| MOBILE
+    MOBILE -->|extended by| ANDROID
+```
+
+### How These Interfaces Are Organized
+
+- **Small capability interfaces**
+  - `ILoginPage` isolates login behavior.
+  - `IHomePage` isolates home page validation and search behavior.
+- **Shared action grouping**
+  - `CommonAction` keeps high-level actions that can be reused across platform flows.
+  - `ShoppingCart` currently acts as a composite interface by inheriting from `CommonAction` and `IHomePage`.
+- **Single consumer-facing entry point**
+  - `IPlatformInterface` combines the full contract so the rest of the framework can hold a single `platform` reference.
+- **Platform markers / specialization**
+  - `Web`, `IMobilePlatform`, and `Android` allow the framework to express platform type without changing the test-facing API.
+
+### Runtime Usage Flowchart
+
+```mermaid
+flowchart LR
+    subgraph Consumers[Consumers]
+        T1[tests.LoginTest / tests.HomePage]
+        T2[stepdefinitions.LoginPageSteps]
+    end
+
+    T1 --> A[AbstractStepDefinitions]
+    T2 --> A
+
+    A -->|initializes| P[platform : IPlatformInterface]
+    A --> H[PlatformHelper.getCurrentPlatform()]
+    H --> C[ConfigurationHelper.getCurrentPlatform()]
+    C --> SEL{platform value}
+
+    SEL -->|web| WP[WebPlatform implements Web]
+    SEL -->|android| AP[AndroidPlatform implements Android]
+    SEL -->|ios| IPH[iOSPlatform implements IMobilePlatform]
+
+    WP --> D[DriverFactory.getDriver()]
+    AP --> D
+    IPH --> D
+
+    WP --> PO[LoginPage / HomePage]
+```
+
+### Practical Example
+
+- `LoginPageSteps` extends `AbstractStepDefinitions`
+- `AbstractStepDefinitions` creates `protected IPlatformInterface platform`
+- When `platform=web`, `PlatformHelper` returns `new WebPlatform()`
+- The step definition calls `platform.launchApplication()` and `platform.loginAs(...)`
+- `WebPlatform` executes the action using `LoginPage`, `HomePage`, and `DriverFactory`
 
 ## End-to-End Execution Flowchart
 
