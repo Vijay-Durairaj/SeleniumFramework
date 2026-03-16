@@ -14,7 +14,8 @@ public class LoginPageSteps extends AbstractStepDefinitions {
 
     @Given("User is on the login page")
     public void givenUserIsOnTheLoginPage() {
-        platform.launchApplication();
+        //platform.launchApplication();
+            platform.deepLogin();
     }
 
     @When("User login to the application")

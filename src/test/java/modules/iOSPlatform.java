@@ -1,16 +1,15 @@
 package modules;
 
-import interfaces.IMobilePlatform;
 import model.User;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import helper.DriverFactory;
 import interfaces.IOS;
 
 public class iOSPlatform implements IOS {
 
-    protected WebDriver driver;
+    protected RemoteWebDriver driver;
 
-    private WebDriver getDriver() {
+    private RemoteWebDriver getDriver() {
         // DriverFactory resolves IOS LOCAL (Appium) or IOS BROWSERSTACK from config.properties
         if (driver == null) {
             driver = DriverFactory.getDriver();
@@ -20,21 +19,28 @@ public class iOSPlatform implements IOS {
 
     @Override
     public void loginAs(User user) {
-
+        getDriver();
     }
 
     @Override
     public void launchApplication() {
-
+        getDriver();
     }
 
     @Override
     public void validateHomePage() {
-        // TODO: implement iOS home page validation using getDriver()
+        // TODO: implement iOS home page validation
+        getDriver();
     }
 
     @Override
     public void searchForKeyword(String keyword) {
-        // TODO: implement iOS search using getDriver()
+        // TODO: implement iOS search
+        getDriver();
+    }
+
+    @Override
+    public void deepLogin() {
+        getDriver();
     }
 }

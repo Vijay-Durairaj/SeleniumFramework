@@ -7,7 +7,7 @@
 
 # Execution mode
 execution:
-  platform: web       # web | android | ios  | env: PLATFORM   | jvm: -Dplatform
+  platform: android       # web | android | ios  | env: PLATFORM   | jvm: -Dplatform
   remote: false       # false = local | true = BrowserStack | env: RUN_REMOTE | jvm: -Drun.remote
 
 # BrowserStack Credentials
@@ -38,8 +38,10 @@ local:
 android:
   local:
     deviceName: emulator-5554       # local Appium device
-    platformVersion: "13.0"         # local Appium OS version
-    browserName: Chrome             # local Appium browser
+    platformVersion: "11"            # local Appium OS version
+    browserName: Chrome             # local Appium browser (used when testing in mobile Chrome)
+    appPackage: org.wikipedia.alpha  # app under test package
+    appActivity: org.wikipedia.main.MainActivity  # app launch activity
   bstack:
     deviceName: Samsung Galaxy S23  # env: BSTACK_ANDROID_DEVICE  | jvm: -Dbrowserstack.android.bstack.deviceName
     osVersion: "13.0"               # env: BSTACK_ANDROID_VERSION | jvm: -Dbrowserstack.android.bstack.osVersion

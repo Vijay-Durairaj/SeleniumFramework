@@ -14,5 +14,10 @@ public class LoginTest extends AbstractStepDefinitions {
         platform.loginAs(validUser);
         platform.validateHomePage();
     }
+
+    @Test
+    public void deepLinkLoginTest() {
+        platform.deepLogin();
+    }
 }
 

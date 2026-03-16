@@ -2,7 +2,6 @@ package helper;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.MutableCapabilities;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -20,19 +19,20 @@ import java.util.Map;
  */
 public class DriverFactory {
 
-    private static final ThreadLocal<WebDriver> DRIVER = new ThreadLocal<>();
+    private static final ThreadLocal<RemoteWebDriver> DRIVER = new ThreadLocal<>();
     private static final String BROWSERSTACK_HUB_URL    = "https://hub-cloud.browserstack.com/wd/hub";
     private static final String BROWSERSTACK_APPIUM_URL = "https://hub-cloud.browserstack.com/wd/hub";
-    private static final String LOCAL_APPIUM_URL        = "http://127.0.0.1:4723/wd/hub";
+    private static final String LOCAL_APPIUM_URL        = "http://127.0.0.1:4723";
 
     // ── Public entry point ────────────────────────────────────────────────────
 
     /**
-     * Returns a driver for the platform declared in config.properties / -Dplatform.
+     * Returns a driver for the platform declared in browserstack.yml / -Dplatform.
+     * Supports Web (ChromeDriver), Android and iOS (RemoteWebDriver / AppiumDriver).
      * Call this from BaseTest or platform controllers.
      */
-    public static WebDriver getDriver() {
-        WebDriver current = DRIVER.get();
+    public static RemoteWebDriver getDriver() {
+        RemoteWebDriver current = DRIVER.get();
         if (current == null) {
             Platforms platform = ConfigurationHelper.getCurrentPlatform();
             boolean   remote   = isRemoteRunEnabled();
@@ -44,7 +44,7 @@ public class DriverFactory {
     }
 
     public static void quitDriver() {
-        WebDriver current = DRIVER.get();
+        RemoteWebDriver current = DRIVER.get();
         if (current != null) {
             current.quit();
             DRIVER.remove();
@@ -53,7 +53,7 @@ public class DriverFactory {
 
     // ── Platform routing ──────────────────────────────────────────────────────
 
-    private static WebDriver createDriver(Platforms platform, boolean remote) {
+    private static RemoteWebDriver createDriver(Platforms platform, boolean remote) {
         switch (platform) {
             case WEB:     return remote ? createBrowserStackWebDriver()     : createLocalWebDriver();
             case ANDROID: return remote ? createBrowserStackAndroidDriver() : createLocalAndroidDriver();
@@ -65,7 +65,7 @@ public class DriverFactory {
 
     // ── WEB ───────────────────────────────────────────────────────────────────
 
-    private static WebDriver createLocalWebDriver() {
+    private static RemoteWebDriver createLocalWebDriver() {
         WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--no-sandbox");
@@ -78,12 +78,12 @@ public class DriverFactory {
             options.addArguments("--window-size=1920,1080");
         }
 
-        WebDriver driver = new ChromeDriver(options);
+        ChromeDriver driver = new ChromeDriver(options);
         driver.manage().window().maximize();
         return driver;
     }
 
-    private static WebDriver createBrowserStackWebDriver() {
+    private static RemoteWebDriver createBrowserStackWebDriver() {
         MutableCapabilities capabilities = new MutableCapabilities();
         capabilities.setCapability("browserName",    BrowserStackConfigReader.get("web", "browser",        "BROWSERSTACK_BROWSER",         "Chrome"));
         capabilities.setCapability("browserVersion", BrowserStackConfigReader.get("web", "browserVersion", "BROWSERSTACK_BROWSER_VERSION", "latest"));
@@ -93,18 +93,19 @@ public class DriverFactory {
 
     // ── ANDROID ───────────────────────────────────────────────────────────────
 
-    private static WebDriver createLocalAndroidDriver() {
-        DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setCapability("platformName",    "Android");
-        caps.setCapability("deviceName",      BrowserStackConfigReader.get("android", "local", "deviceName",       null, "emulator-5554"));
-        caps.setCapability("platformVersion", BrowserStackConfigReader.get("android", "local", "platformVersion",  null, "13.0"));
-        caps.setCapability("automationName",  "UiAutomator2");
-        caps.setCapability("browserName",     BrowserStackConfigReader.get("android", "local", "browserName",      null, "Chrome"));
+    private static RemoteWebDriver createLocalAndroidDriver() {
+        MutableCapabilities caps = new MutableCapabilities();
+        caps.setCapability("platformName", "Android");
+        caps.setCapability("appium:deviceName",      BrowserStackConfigReader.get("android", "local", "deviceName",       null, "emulator-5554"));
+        caps.setCapability("appium:platformVersion",  BrowserStackConfigReader.get("android", "local", "platformVersion",  null, "13.0"));
+        caps.setCapability("appium:automationName",   "UiAutomator2");
+        caps.setCapability("appium:appPackage",       BrowserStackConfigReader.get("android", "local", "appPackage",       null, "org.wikipedia"));
+        caps.setCapability("appium:appActivity",      BrowserStackConfigReader.get("android", "local", "appActivity",      null, "org.wikipedia.main.MainActivity"));
         System.out.println("[DriverFactory] Connecting to local Appium for Android...");
         return remoteDriver(LOCAL_APPIUM_URL, caps);
     }
 
-    private static WebDriver createBrowserStackAndroidDriver() {
+    private static RemoteWebDriver createBrowserStackAndroidDriver() {
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setCapability("platformName",   "Android");
         caps.setCapability("automationName", "UiAutomator2");
@@ -119,18 +120,18 @@ public class DriverFactory {
 
     // ── IOS ───────────────────────────────────────────────────────────────────
 
-    private static WebDriver createLocalIOSDriver() {
-        DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setCapability("platformName",    "iOS");
-        caps.setCapability("deviceName",      BrowserStackConfigReader.get("ios", "local", "deviceName",      null, "iPhone 15"));
-        caps.setCapability("platformVersion", BrowserStackConfigReader.get("ios", "local", "platformVersion", null, "17.0"));
-        caps.setCapability("automationName",  "XCUITest");
-        caps.setCapability("browserName",     BrowserStackConfigReader.get("ios", "local", "browserName",     null, "Safari"));
+    private static RemoteWebDriver createLocalIOSDriver() {
+        MutableCapabilities caps = new MutableCapabilities();
+        caps.setCapability("platformName",           "iOS");
+        caps.setCapability("appium:deviceName",      BrowserStackConfigReader.get("ios", "local", "deviceName",      null, "iPhone 15"));
+        caps.setCapability("appium:platformVersion",  BrowserStackConfigReader.get("ios", "local", "platformVersion", null, "17.0"));
+        caps.setCapability("appium:automationName",   "XCUITest");
+        caps.setCapability("appium:browserName",      BrowserStackConfigReader.get("ios", "local", "browserName",     null, "Safari"));
         System.out.println("[DriverFactory] Connecting to local Appium for iOS...");
         return remoteDriver(LOCAL_APPIUM_URL, caps);
     }
 
-    private static WebDriver createBrowserStackIOSDriver() {
+    private static RemoteWebDriver createBrowserStackIOSDriver() {
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setCapability("platformName",   "iOS");
         caps.setCapability("automationName", "XCUITest");
@@ -186,7 +187,7 @@ public class DriverFactory {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private static WebDriver remoteDriver(String hubUrl, MutableCapabilities caps) {
+    private static RemoteWebDriver remoteDriver(String hubUrl, MutableCapabilities caps) {
         try {
             return new RemoteWebDriver(new URL(hubUrl), caps);
         } catch (MalformedURLException e) {

@@ -50,6 +50,11 @@ public class WebPlatform implements Web {
     }
 
     @Override
+    public void deepLogin() {
+
+    }
+
+    @Override
     public void validateHomePage() {
         ensureInitialized();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
