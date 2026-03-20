@@ -7,4 +7,4 @@ Feature: Login Page
 
     @LoginTest
     Scenario: User login to application using deeplink
-        Given User is on the login page
+        Given User is on the skip login page

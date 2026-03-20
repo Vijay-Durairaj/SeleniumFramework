@@ -14,8 +14,7 @@ public class LoginPageSteps extends AbstractStepDefinitions {
 
     @Given("User is on the login page")
     public void givenUserIsOnTheLoginPage() {
-        //platform.launchApplication();
-            platform.deepLogin();
+        platform.launchApplication();
     }
 
     @When("User login to the application")
@@ -27,6 +26,11 @@ public class LoginPageSteps extends AbstractStepDefinitions {
     @Then("User should be redirected to the dashboard page")
     public void userShouldBeRedirectedToTheDashboardPage() {
         platform.validateHomePage();
+    }
+
+    @Given("User is on the skip login page")
+    public void givenUserIsOnTheSkipLoginPage() {
+        platform.deepLogin();
     }
 
 }
