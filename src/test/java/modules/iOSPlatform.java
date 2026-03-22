@@ -10,7 +10,6 @@ public class iOSPlatform implements IOS {
     protected RemoteWebDriver driver;
 
     private RemoteWebDriver getDriver() {
-        // DriverFactory resolves IOS LOCAL (Appium) or IOS BROWSERSTACK from config.properties
         if (driver == null) {
             driver = DriverFactory.getDriver();
         }
@@ -18,29 +17,52 @@ public class iOSPlatform implements IOS {
     }
 
     @Override
-    public void loginAs(User user) {
+    public void deepLogin() {
         getDriver();
+    }
+
+    @Override
+    public void enterValue(String value) {
+
+    }
+
+    @Override
+    public void clickAccessibilityTab() {
+
+    }
+
+    @Override
+    public void validateAccessibilityTab() {
+
+    }
+
+    @Override
+    public void installApplication(String appPath) {
+
+    }
+
+    @Override
+    public void terminateApplication(String appPath) {
+
     }
 
     @Override
     public void launchApplication() {
-        getDriver();
+
     }
 
     @Override
     public void validateHomePage() {
-        // TODO: implement iOS home page validation
-        getDriver();
+
     }
 
     @Override
     public void searchForKeyword(String keyword) {
-        // TODO: implement iOS search
-        getDriver();
+
     }
 
     @Override
-    public void deepLogin() {
-        getDriver();
+    public void loginAs(User user) {
+
     }
 }

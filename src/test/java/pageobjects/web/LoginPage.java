@@ -1,4 +1,4 @@
-package pageobjects;
+package pageobjects.web;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;

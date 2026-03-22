@@ -39,9 +39,11 @@ android:
   local:
     deviceName: emulator-5554       # local Appium device
     platformVersion: "11"            # local Appium OS version
+    APP: /Users/vijay/Downloads/bitbar-sample-app.apk
+    AutomationName: UiAutomator2     # local Appium automation engine
     browserName: Chrome             # local Appium browser (used when testing in mobile Chrome)
-    appPackage: org.wikipedia.alpha  # app under test package
-    appActivity: org.wikipedia.main.MainActivity  # app launch activity
+    appPackage: io.appium.android.apis # app under test package
+    appActivity: io.appium.android.apis.ApiDemos # app launch activity
   bstack:
     deviceName: Samsung Galaxy S23  # env: BSTACK_ANDROID_DEVICE  | jvm: -Dbrowserstack.android.bstack.deviceName
     osVersion: "13.0"               # env: BSTACK_ANDROID_VERSION | jvm: -Dbrowserstack.android.bstack.osVersion

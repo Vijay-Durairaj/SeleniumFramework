@@ -6,9 +6,9 @@ import model.User;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import pageobjects.LoginPage;
+import pageobjects.web.LoginPage;
 import helper.DriverFactory;
-import pageobjects.HomePage;
+import pageobjects.web.HomePage;
 
 import java.time.Duration;
 
@@ -47,11 +47,6 @@ public class WebPlatform implements Web {
         loginPage.enterUsername(validUser.getUsername());
         loginPage.enterPassword(validUser.getPassword());
         loginPage.clickLogin();
-    }
-
-    @Override
-    public void deepLogin() {
-
     }
 
     @Override

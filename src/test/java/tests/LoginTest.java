@@ -17,7 +17,7 @@ public class LoginTest extends AbstractStepDefinitions {
 
     @Test
     public void deepLinkLoginTest() {
-        platform.deepLogin();
+        platform.asMobile().deepLogin();
     }
 }
 

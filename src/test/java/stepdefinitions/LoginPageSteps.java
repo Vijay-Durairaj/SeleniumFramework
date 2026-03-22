@@ -30,7 +30,13 @@ public class LoginPageSteps extends AbstractStepDefinitions {
 
     @Given("User is on the skip login page")
     public void givenUserIsOnTheSkipLoginPage() {
-        platform.deepLogin();
+        platform.asMobile().deepLogin();
     }
+
+    @Given("User enter the details as {string}")
+    public void givenUserEnterTheDetailsAsAnd(String username) {
+        platform.asMobile().enterValue(username);
+    }
+
 
 }

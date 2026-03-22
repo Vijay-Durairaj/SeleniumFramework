@@ -1,4 +1,4 @@
 package interfaces;
 
-public interface ShoppingCart {
+public interface ShoppingCart extends CommonAction {
 }
