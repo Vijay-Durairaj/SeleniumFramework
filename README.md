@@ -29,14 +29,14 @@ One set of tests runs against **Web**, **Android**, and **iOS** — locally or o
 | Capability | Detail |
 |---|---|
 | **Contract-first design** | Tests depend on interfaces, never on concrete platform classes |
-| **Clean interface separation** | Common, mobile-shared, Android-only, iOS-only, and web-only methods live at different levels |
-| **Platform casting helpers** | `asMobile()`, `asAndroid()`, `asIOS()`, `asWeb()` give type-safe access to the right methods |
+| **Clean interface separation** | Common, mobile-shared, Android-only, iOS-only, and web-only methods each live at the correct level |
 | **No empty stubs** | `WebPlatform` never implements mobile methods; `AndroidPlatform` never implements web methods |
-| **Runtime platform selection** | JVM arg, env var, or YAML — one switch changes the target platform |
+| **Platform casting helpers** | `asMobile()`, `asAndroid()`, `asIOS()`, `asWeb()` — type-safe access to platform-specific methods |
+| **Runtime platform selection** | JVM arg, env var, or YAML config |
 | **Local + BrowserStack** | Toggle with `-Drun.remote=true` |
 | **Two test entry paths** | TestNG classes and Cucumber BDD |
 | **Thread-safe drivers** | `DriverFactory` uses `ThreadLocal` for parallel execution |
-| **Native Appium drivers** | `AndroidDriver` and `IOSDriver` for full Appium API access (installApp, removeApp, etc.) |
+| **Native Appium drivers** | `AndroidDriver` / `IOSDriver` for full Appium API (installApp, removeApp, activateApp, etc.) |
 
 ---
 
@@ -49,7 +49,7 @@ One set of tests runs against **Web**, **Android**, and **iOS** — locally or o
 | Appium Java Client | 9.3.0 | Mobile automation (`AndroidDriver`, `IOSDriver`) |
 | TestNG | 7.9.0 | Test runner |
 | Cucumber | 7.15.0 | BDD runner (`cucumber-java`, `cucumber-junit`) |
-| WebDriverManager | 6.2.0 | Automatic driver binary management |
+| WebDriverManager | 6.2.0 | Automatic chromedriver management |
 | ExtentReports | 5.0.9 | HTML test reports |
 | BrowserStack SDK | 1.26.1 | Cloud device execution |
 | SnakeYAML | 2.2 | YAML config parsing |
@@ -61,87 +61,87 @@ One set of tests runs against **Web**, **Android**, and **iOS** — locally or o
 
 ```text
 SeleniumFramework/
-├── pom.xml                                    # Maven build config
-├── testng.xml                                 # TestNG suite definition
+├── pom.xml
+├── testng.xml
 ├── README.md
 └── src/test/
     ├── java/
-    │   ├── helper/                            # Framework infrastructure
-    │   │   ├── BaseTest.java                       # TestNG report lifecycle
-    │   │   ├── BrowserStackConfigReader.java       # Reads browserstack.yml
-    │   │   ├── ConfigReader.java                   # Reads config.properties
-    │   │   ├── ConfigurationHelper.java            # Resolves active platform
-    │   │   ├── DriverFactory.java                  # Thread-safe driver creation
-    │   │   ├── ExtentManager.java                  # ExtentReports singleton
-    │   │   ├── PlatformHelper.java                 # Factory for platform instances
-    │   │   └── Platforms.java                      # Enum: ANDROID, IOS, WEB
+    │   ├── helper/
+    │   │   ├── BaseTest.java                  # TestNG report lifecycle
+    │   │   ├── BrowserStackConfigReader.java  # Reads browserstack.yml
+    │   │   ├── ConfigReader.java              # Reads config.properties
+    │   │   ├── ConfigurationHelper.java       # Resolves active platform
+    │   │   ├── DriverFactory.java             # Thread-safe driver creation
+    │   │   ├── ExtentManager.java             # ExtentReports singleton
+    │   │   ├── PlatformHelper.java            # Factory for platform instances
+    │   │   └── Platforms.java                 # Enum: ANDROID, IOS, WEB
     │   │
-    │   ├── interfaces/                        # Contracts
-    │   │   ├── CommonAction.java                   # launchApplication()
-    │   │   ├── ILoginPage.java                     # loginAs(User)
-    │   │   ├── IHomePage.java                      # validateHomePage(), searchForKeyword()
-    │   │   ├── ShoppingCart.java                   # Marker (extends CommonAction)
-    │   │   ├── IPlatformInterface.java             # Common contract + casting helpers
-    │   │   ├── IMobilePlatform.java                # Shared mobile: deepLogin, install, etc.
-    │   │   ├── Android.java                        # Android-only: uninstallApplication
-    │   │   ├── IOS.java                            # iOS-only (extension point)
-    │   │   └── Web.java                            # Web-only (extension point)
+    │   ├── interfaces/
+    │   │   ├── CommonAction.java              # launchApplication()
+    │   │   ├── ILoginPage.java                # loginAs(User)
+    │   │   ├── IHomePage.java                 # validateHomePage(), searchForKeyword()
+    │   │   ├── ShoppingCart.java              # Marker interface
+    │   │   ├── IPlatformInterface.java        # Common contract + casting helpers
+    │   │   ├── IMobilePlatform.java           # Mobile-shared methods
+    │   │   ├── Android.java                   # Android-only methods
+    │   │   ├── IOS.java                       # iOS-only (extension point)
+    │   │   └── Web.java                       # Web-only (extension point)
     │   │
-    │   ├── model/                             # Data objects
-    │   │   └── User.java                           # username + password
+    │   ├── model/
+    │   │   └── User.java
     │   │
-    │   ├── modules/                           # Platform implementations
-    │   │   ├── WebPlatform.java                    # implements Web
-    │   │   ├── AndroidPlatform.java                # implements Android
-    │   │   └── iOSPlatform.java                    # implements IOS
+    │   ├── modules/
+    │   │   ├── WebPlatform.java               # implements Web
+    │   │   ├── AndroidPlatform.java           # implements Android
+    │   │   └── iOSPlatform.java               # implements IOS
     │   │
-    │   ├── pageobjects/                       # Page Object Model
+    │   ├── pageobjects/
     │   │   ├── web/
-    │   │   │   ├── LoginPage.java                  # Web login form
-    │   │   │   └── HomePage.java                   # Web home page
+    │   │   │   ├── LoginPage.java
+    │   │   │   └── HomePage.java
     │   │   └── android/
-    │   │       └── TestMobileHomePage.java          # Android API Demos page
+    │   │       └── TestMobileHomePage.java
     │   │
-    │   ├── stepdefinitions/                   # Cucumber glue
-    │   │   ├── AbstractStepDefinitions.java        # Base: platform + data cache
-    │   │   ├── LoginPageSteps.java                 # Login feature steps
-    │   │   └── TestAndroidMobileApplicationSteps.java  # Android app steps
+    │   ├── stepdefinitions/
+    │   │   ├── AbstractStepDefinitions.java
+    │   │   ├── LoginPageSteps.java
+    │   │   └── TestAndroidMobileApplicationSteps.java
     │   │
-    │   ├── tests/                             # TestNG tests
-    │   │   ├── LoginTest.java                      # Login + deep-link
-    │   │   └── HomePage.java                       # Search keyword
+    │   ├── tests/
+    │   │   ├── LoginTest.java
+    │   │   └── HomePage.java
     │   │
     │   └── utils/
-    │       └── TestRunner.java                     # Cucumber JUnit runner
+    │       └── TestRunner.java
     │
     └── resources/
         ├── config/
-        │   ├── browserstack.yml                    # Platform, execution, device config
-        │   └── config.properties                   # App test data (URLs, credentials)
+        │   ├── browserstack.yml
+        │   └── config.properties
         ├── features/
-        │   ├── loginpage.feature                   # Login scenarios
-        │   └── testAndroidApp.feature              # Android app install/launch scenarios
+        │   ├── loginpage.feature
+        │   └── testAndroidApp.feature
         └── application/
-            └── ApiDemos-debug.apk                  # Android test APK
+            └── ApiDemos-debug.apk
 ```
 
 ---
 
 ## Interface Hierarchy
 
-This is the core design of the framework. Each level adds methods specific to its scope. A class only implements the interface it needs — no empty stubs.
+Each level in the hierarchy adds only the methods that belong at that scope. A platform class implements **one** interface and gets exactly the methods it needs — nothing more.
 
 ```mermaid
 flowchart TD
     CA["CommonAction\nlaunchApplication()"]
     ILP["ILoginPage\nloginAs(User)"]
     IHP["IHomePage\nvalidateHomePage()\nsearchForKeyword(String)"]
-    SC["ShoppingCart"]
+    SC["ShoppingCart\n(marker)"]
 
-    CA --> SC
-    SC --> IPI
+    CA --> IPI
     ILP --> IPI
     IHP --> IPI
+    SC --> IPI
 
     IPI["IPlatformInterface\nasMobile() | asAndroid()\nasIOS() | asWeb()"]
 
@@ -162,65 +162,77 @@ flowchart TD
     style IOS fill:#fff3e0
 ```
 
-**How to read:**
-- Solid arrows = **extends** (interface inheritance)
-- Dotted arrows = **implements** (class fulfills interface)
-- Each level only adds what's new at that level
-- `WebPlatform` only implements `Web` → inherits common methods, zero mobile stubs
-- `AndroidPlatform` implements `Android` → gets common + mobile + Android-specific
-- `iOSPlatform` implements `IOS` → gets common + mobile + iOS-specific
+**How to read the diagram:**
+
+| Arrow | Meaning |
+|---|---|
+| Solid (`→`) | **extends** — interface inheritance |
+| Dotted (`-.->`) | **implements** — class fulfills the interface |
+
+**Key points:**
+- `WebPlatform implements Web` → only common methods, zero mobile stubs needed
+- `AndroidPlatform implements Android` → common + mobile-shared + Android-only
+- `iOSPlatform implements IOS` → common + mobile-shared + iOS extension point
+- `ShoppingCart` is a standalone marker interface (no methods, no parent)
 
 ### What each level owns
 
-| Level | Interface | Methods defined here |
+| Level | Interface | Methods defined at this level |
 |---|---|---|
-| **Common** | `IPlatformInterface` | `launchApplication()`, `loginAs(User)`, `validateHomePage()`, `searchForKeyword(String)` + casting helpers |
+| **Behavior contracts** | `CommonAction` | `launchApplication()` |
+| | `ILoginPage` | `loginAs(User)` |
+| | `IHomePage` | `validateHomePage()`, `searchForKeyword(String)` |
+| | `ShoppingCart` | *(empty marker)* |
+| **Common** | `IPlatformInterface` | Inherits all above + `asMobile()`, `asAndroid()`, `asIOS()`, `asWeb()` |
 | **Mobile shared** | `IMobilePlatform` | `deepLogin()`, `enterValue()`, `clickAccessibilityTab()`, `validateAccessibilityTab()`, `installApplication()`, `terminateApplication()` |
 | **Android only** | `Android` | `uninstallApplication()` |
-| **iOS only** | `IOS` | *(extension point — add iOS-specific methods here)* |
-| **Web only** | `Web` | *(extension point — add web-specific methods here)* |
+| **iOS only** | `IOS` | *(extension point)* |
+| **Web only** | `Web` | *(extension point)* |
 
 ---
 
 ## How Platform Casting Works
 
-`IPlatformInterface` provides four casting helpers. Each returns a more specific type, giving you access to that level's methods.
+In step definitions, `platform` is typed as `IPlatformInterface`. Four default casting helpers let you reach platform-specific methods:
 
 ```java
-// Common — works on all platforms
+// ── Common — works on ALL platforms ──────────────────────────
 platform.launchApplication();
 platform.loginAs(user);
 platform.validateHomePage();
 platform.searchForKeyword("watch");
 
-// Mobile shared — Android + iOS
+// ── Mobile shared — Android + iOS ───────────────────────────
 platform.asMobile().deepLogin();
 platform.asMobile().installApplication(apkPath);
 platform.asMobile().terminateApplication(packageName);
 
-// Android only
+// ── Android only ─────────────────────────────────────────────
 platform.asAndroid().uninstallApplication(packageName);
 
-// iOS only (future methods)
-platform.asIOS().someIOSOnlyMethod();
+// ── iOS only (add future methods to IOS interface) ───────────
+platform.asIOS().someIOSMethod();
 
-// Web only (future methods)
-platform.asWeb().someWebOnlyMethod();
+// ── Web only (add future methods to Web interface) ───────────
+platform.asWeb().someWebMethod();
 ```
 
-### What the IDE shows at each level
+### IDE autocomplete at each level
 
-| You type | Autocomplete shows |
+| You type | Methods shown |
 |---|---|
-| `platform.` | Common: `launchApplication`, `loginAs`, `validateHomePage`, `searchForKeyword`, `asMobile`, `asAndroid`, `asIOS`, `asWeb` |
-| `platform.asMobile().` | Mobile shared: `deepLogin`, `enterValue`, `clickAccessibilityTab`, `validateAccessibilityTab`, `installApplication`, `terminateApplication` + all common |
-| `platform.asAndroid().` | Android only: `uninstallApplication` + all mobile + all common |
-| `platform.asIOS().` | iOS only (future) + all mobile + all common |
-| `platform.asWeb().` | Web only (future) + all common |
+| `platform.` | `launchApplication`, `loginAs`, `validateHomePage`, `searchForKeyword` + `asMobile`, `asAndroid`, `asIOS`, `asWeb` |
+| `platform.asMobile().` | `deepLogin`, `enterValue`, `clickAccessibilityTab`, `validateAccessibilityTab`, `installApplication`, `terminateApplication` + all common |
+| `platform.asAndroid().` | `uninstallApplication` + all mobile-shared + all common |
+| `platform.asIOS().` | *(future iOS methods)* + all mobile-shared + all common |
+| `platform.asWeb().` | *(future web methods)* + all common |
 
 ### Runtime safety
 
-Calling `platform.asMobile()` on a `WebPlatform` throws `UnsupportedOperationException` with a clear message. Same for `asAndroid()` on iOS, etc.
+Calling `platform.asMobile()` when the platform is `WebPlatform` throws:
+```
+UnsupportedOperationException: WebPlatform is not a mobile platform
+```
 
 ---
 
@@ -228,13 +240,15 @@ Calling `platform.asMobile()` on a `WebPlatform` throws `UnsupportedOperationExc
 
 ### `interfaces/` — Contracts
 
-| Interface | Extends | Methods |
+Defines **what** each platform must do. Tests never depend on concrete classes.
+
+| Interface | Extends | Own methods |
 |---|---|---|
 | `CommonAction` | — | `launchApplication()` |
 | `ILoginPage` | — | `loginAs(User)` |
 | `IHomePage` | — | `validateHomePage()`, `searchForKeyword(String)` |
-| `ShoppingCart` | `CommonAction` | *(marker — future cart features)* |
-| `IPlatformInterface` | all above | `asMobile()`, `asAndroid()`, `asIOS()`, `asWeb()` |
+| `ShoppingCart` | — | *(empty marker)* |
+| `IPlatformInterface` | `ILoginPage`, `IHomePage`, `ShoppingCart`, `CommonAction` | `asMobile()`, `asAndroid()`, `asIOS()`, `asWeb()` |
 | `IMobilePlatform` | `IPlatformInterface` | `deepLogin()`, `enterValue()`, `clickAccessibilityTab()`, `validateAccessibilityTab()`, `installApplication()`, `terminateApplication()` |
 | `Android` | `IMobilePlatform` | `uninstallApplication()` |
 | `IOS` | `IMobilePlatform` | *(extension point)* |
@@ -242,27 +256,27 @@ Calling `platform.asMobile()` on a `WebPlatform` throws `UnsupportedOperationExc
 
 ### `modules/` — Implementations
 
-| Class | Implements | Driver type | Status |
+| Class | Implements | Driver | Status |
 |---|---|---|---|
-| `WebPlatform` | `Web` | `ChromeDriver` / `RemoteWebDriver` | ✅ Full (login, home, search) |
+| `WebPlatform` | `Web` | `ChromeDriver` | ✅ Full — login, home validation, search |
 | `AndroidPlatform` | `Android` | `AndroidDriver` | ✅ Deep-link, app install/uninstall/terminate, accessibility |
-| `iOSPlatform` | `IOS` | `IOSDriver` | ⚙️ Stubs (driver wiring ready) |
+| `iOSPlatform` | `IOS` | `IOSDriver` | ⚙️ Stubs — driver wiring ready |
 
-### `helper/` — Framework Infrastructure
+### `helper/` — Infrastructure
 
 | Class | Purpose |
 |---|---|
-| `ConfigReader` | Loads `config.properties` — app test data |
-| `BrowserStackConfigReader` | Loads `browserstack.yml` — priority: JVM arg → env var → YAML → fallback |
-| `ConfigurationHelper` | Resolves active platform from JVM / env / YAML |
+| `ConfigReader` | Loads `config.properties` (app URLs, credentials, APK paths) |
+| `BrowserStackConfigReader` | Loads `browserstack.yml` — priority: **JVM arg → env var → YAML → fallback** |
+| `ConfigurationHelper` | Resolves active platform (`WEB` / `ANDROID` / `IOS`) |
 | `PlatformHelper` | Factory — returns cached `IPlatformInterface` instance |
-| `DriverFactory` | Thread-safe driver creation: `ChromeDriver` for web, `AndroidDriver` for Android, `IOSDriver` for iOS. Local and BrowserStack |
+| `DriverFactory` | Thread-safe driver creation via `ThreadLocal`. Returns `ChromeDriver`, `AndroidDriver`, or `IOSDriver` based on platform + local/remote config |
 | `Platforms` | Enum: `ANDROID`, `IOS`, `WEB`, `UNKNOWN` |
 | `BaseTest` + `ExtentManager` | TestNG + ExtentReports lifecycle |
 
 ### `pageobjects/` — Page Object Model
 
-| Class | Platform | Elements |
+| Class | Platform | Key elements |
 |---|---|---|
 | `pageobjects.web.LoginPage` | Web | `usernameInput`, `passwordInput`, `loginButton` |
 | `pageobjects.web.HomePage` | Web | `shopNameHeader`, `searchInput`, `priceTag` |
@@ -270,17 +284,17 @@ Calling `platform.asMobile()` on a `WebPlatform` throws `UnsupportedOperationExc
 
 ### `stepdefinitions/` — Cucumber Glue
 
-| Class | Scope | Key calls |
+| Class | Scope | Example calls |
 |---|---|---|
-| `AbstractStepDefinitions` | Base | Initializes `IPlatformInterface platform`, provides `getOrSaveData()` |
-| `LoginPageSteps` | Login flows | `platform.launchApplication()`, `platform.asMobile().deepLogin()` |
+| `AbstractStepDefinitions` | Base | Initializes `platform`, provides `getOrSaveData()` cache |
+| `LoginPageSteps` | Login / deeplink / input | `platform.launchApplication()`, `platform.asMobile().deepLogin()`, `platform.asMobile().enterValue()` |
 | `TestAndroidMobileApplicationSteps` | Android app lifecycle | `platform.asMobile().installApplication()`, `platform.asAndroid().uninstallApplication()` |
 
 ### `tests/` — TestNG Tests
 
 | Class | Tests |
 |---|---|
-| `LoginTest` | `validLoginTest()` — full login flow; `deepLinkLoginTest()` — mobile deep-link |
+| `LoginTest` | `validLoginTest()` — full web login; `deepLinkLoginTest()` — mobile deep-link |
 | `HomePage` | `searchKeywordTest()` — launch + search |
 
 ---
@@ -294,29 +308,29 @@ flowchart TD
     ENTRY -->|TestNG| TNG["testng.xml\nor -Dtest=tests.LoginTest"]
     ENTRY -->|Cucumber| CUC["utils.TestRunner"]
 
-    TNG --> TCLASS["LoginTest\nHomePage"]
+    TNG --> TCLASS["LoginTest / HomePage"]
     CUC --> FEAT["loginpage.feature\ntestAndroidApp.feature\n+ Step Definitions"]
 
     TCLASS --> ABS["AbstractStepDefinitions\nconstructor"]
     FEAT --> ABS
 
     ABS --> PH["PlatformHelper\ngetCurrentPlatform()"]
-    PH --> CH["ConfigurationHelper\ngetCurrentPlatform()"]
+    PH --> CH["ConfigurationHelper"]
     CH --> PLAT{"platform?"}
 
     PLAT -->|web| WP["new WebPlatform\nimplements Web"]
     PLAT -->|android| AP["new AndroidPlatform\nimplements Android"]
     PLAT -->|ios| IP["new iOSPlatform\nimplements IOS"]
 
-    WP --> DF["DriverFactory\ngetDriver()"]
+    WP --> DF["DriverFactory.getDriver()"]
     AP --> DF
     IP --> DF
 
     DF --> REMOTE{"run.remote?"}
     REMOTE -->|false| LOCAL["Local\nChromeDriver / AndroidDriver / IOSDriver"]
-    REMOTE -->|true| BS["BrowserStack\nRemoteWebDriver / AndroidDriver / IOSDriver"]
+    REMOTE -->|true| BS["BrowserStack"]
 
-    LOCAL --> ACTIONS["Platform actions"]
+    LOCAL --> ACTIONS["Platform actions\nvia interface methods"]
     BS --> ACTIONS
 
     ACTIONS --> REPORT["Assertions + Reports"]
@@ -334,27 +348,23 @@ flowchart LR
     YML["browserstack.yml"] --> CH
 
     CH --> PH["PlatformHelper"]
-    PH --> PI{"platform instance?"}
+    PH --> PI{"platform?"}
 
-    PI -->|web| WP["WebPlatform"]
-    PI -->|android| AP["AndroidPlatform"]
-    PI -->|ios| IP["iOSPlatform"]
+    PI -->|web| WP["WebPlatform\nChromeDriver"]
+    PI -->|android| AP["AndroidPlatform\nAndroidDriver"]
+    PI -->|ios| IP["iOSPlatform\nIOSDriver"]
 
-    WP --> DFW["DriverFactory\nChromeDriver"]
-    AP --> DFA["DriverFactory\nAndroidDriver"]
-    IP --> DFI["DriverFactory\nIOSDriver"]
-
-    DFW --> RT{"run.remote?"}
-    DFA --> RT
-    DFI --> RT
+    WP --> RT{"run.remote?"}
+    AP --> RT
+    IP --> RT
     RT -->|false| LOC["Local browser\nor Appium"]
     RT -->|true| BS["BrowserStack"]
 ```
 
 **Resolution priority** (highest wins):
 
-1. JVM system property (`-Dplatform=android`)
-2. Environment variable (`PLATFORM=android`)
+1. JVM system property — `-Dplatform=android`
+2. Environment variable — `PLATFORM=android`
 3. `browserstack.yml` → `execution.platform`
 4. Default: `web`
 
@@ -373,7 +383,7 @@ android.apk=src/test/resources/application/ApiDemos-debug.apk
 android.appPackage=io.appium.android.apis
 ```
 
-### `browserstack.yml` — Execution, Platform, and Device Settings
+### `browserstack.yml` — Execution, Platform, and Devices
 
 ```yaml
 execution:
@@ -408,11 +418,10 @@ ios:
     osVersion: "17"
 ```
 
-Every YAML value can be overridden at runtime:
+Override any value at runtime:
 
 ```bash
-mvn test -Dbrowserstack.execution.platform=android
-# or
+mvn test -Dplatform=web -Drun.remote=false
 export PLATFORM=android && mvn test
 ```
 
@@ -420,20 +429,20 @@ export PLATFORM=android && mvn test
 
 ## How to Run
 
-### Run a specific platform locally
+### Local execution
 
 ```bash
 # Web (default)
-mvn test -Dplatform=web -Drun.remote=false
+mvn test -Dplatform=web
 
-# Android (requires Appium server running + emulator)
-mvn test -Dplatform=android -Drun.remote=false
+# Android (requires Appium + emulator)
+mvn test -Dplatform=android
 
-# iOS (requires Appium server running + simulator)
-mvn test -Dplatform=ios -Drun.remote=false
+# iOS (requires Appium + simulator)
+mvn test -Dplatform=ios
 ```
 
-### Run via TestNG
+### TestNG
 
 ```bash
 mvn test -DsuiteXmlFile=testng.xml
@@ -441,13 +450,13 @@ mvn -Dtest=tests.LoginTest test
 mvn -Dtest=tests.HomePage test
 ```
 
-### Run via Cucumber
+### Cucumber
 
 ```bash
 mvn -Dtest=utils.TestRunner test
 ```
 
-### Run on BrowserStack
+### BrowserStack
 
 ```bash
 export BROWSERSTACK_USERNAME="your-user"
@@ -482,47 +491,47 @@ mvn test -Dplatform=android -Drun.remote=true
 
 ## How to Add New Coverage
 
-### Add a common method (all platforms)
+### Common method (all platforms)
 
-1. Add the method to the relevant behavior interface (`IHomePage`, `ILoginPage`, `CommonAction`, or create new)
-2. Wire it into `IPlatformInterface` if it's a new interface
-3. Implement in `WebPlatform`, `AndroidPlatform`, and `iOSPlatform`
+1. Add to `IHomePage`, `ILoginPage`, `CommonAction`, or a new behavior interface
+2. If new interface → wire it into `IPlatformInterface extends ...`
+3. Implement in `WebPlatform`, `AndroidPlatform`, `iOSPlatform`
 
-### Add a mobile-shared method (Android + iOS)
+### Mobile-shared method (Android + iOS)
 
-1. Add the method to `IMobilePlatform`
+1. Add to `IMobilePlatform`
 2. Implement in `AndroidPlatform` and `iOSPlatform`
 3. Call via `platform.asMobile().newMethod()`
 
-### Add an Android-only method
+### Android-only method
 
-1. Add the method to `Android` interface
+1. Add to `Android` interface
 2. Implement in `AndroidPlatform`
 3. Call via `platform.asAndroid().newMethod()`
 
-### Add an iOS-only method
+### iOS-only method
 
-1. Add the method to `IOS` interface
+1. Add to `IOS` interface
 2. Implement in `iOSPlatform`
 3. Call via `platform.asIOS().newMethod()`
 
-### Add a web-only method
+### Web-only method
 
-1. Add the method to `Web` interface
+1. Add to `Web` interface
 2. Implement in `WebPlatform`
 3. Call via `platform.asWeb().newMethod()`
 
-### Add page objects
+### Page objects
 
-- Web pages go in `pageobjects/web/`
-- Android pages go in `pageobjects/android/`
-- iOS pages go in `pageobjects/ios/` (create as needed)
+- Web → `pageobjects/web/`
+- Android → `pageobjects/android/`
+- iOS → `pageobjects/ios/` (create as needed)
 
 ---
 
 ## Current Limitations
 
 - `iOSPlatform` has stub implementations — driver wiring is ready but business flows need implementation
-- Page objects for iOS (`pageobjects/ios/`) need to be created
-- `ShoppingCart` interface is a placeholder — no cart-specific actions defined yet
-- `BaseTest` and `ExtentManager` are wired for TestNG only; Cucumber uses its own reporter plugins
+- Page objects for iOS need to be created under `pageobjects/ios/`
+- `ShoppingCart` is an empty marker interface — no cart-specific actions defined yet
+- `BaseTest` / `ExtentManager` are wired for TestNG only; Cucumber uses its own reporter plugins
