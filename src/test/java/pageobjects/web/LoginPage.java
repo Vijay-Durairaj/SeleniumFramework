@@ -14,6 +14,7 @@ import java.time.Duration;
  * This class represents the login page of the application.
  * It contains methods to interact with the login form elements.
  */
+
 public class LoginPage {
     WebDriver driver;
     private final WebDriverWait wait;

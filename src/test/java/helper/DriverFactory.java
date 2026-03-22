@@ -1,5 +1,7 @@
 package helper;
 
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.ios.IOSDriver;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -102,7 +104,7 @@ public class DriverFactory {
         caps.setCapability("appium:appPackage",       BrowserStackConfigReader.get("android", "local", "appPackage",       null, "org.wikipedia"));
         caps.setCapability("appium:appActivity",      BrowserStackConfigReader.get("android", "local", "appActivity",      null, "org.wikipedia.main.MainActivity"));
         System.out.println("[DriverFactory] Connecting to local Appium for Android...");
-        return remoteDriver(LOCAL_APPIUM_URL, caps);
+        return appiumAndroidDriver(LOCAL_APPIUM_URL, caps);
     }
 
     private static RemoteWebDriver createBrowserStackAndroidDriver() {
@@ -115,7 +117,7 @@ public class DriverFactory {
         bstackOptions.put("deviceName", BrowserStackConfigReader.get("android", "bstack", "deviceName", "BSTACK_ANDROID_DEVICE",  "Samsung Galaxy S23"));
         bstackOptions.put("osVersion",  BrowserStackConfigReader.get("android", "bstack", "osVersion",  "BSTACK_ANDROID_VERSION", "13.0"));
         caps.setCapability("bstack:options", bstackOptions);
-        return remoteDriver(BROWSERSTACK_APPIUM_URL, caps);
+        return appiumAndroidDriver(BROWSERSTACK_APPIUM_URL, caps);
     }
 
     // ── IOS ───────────────────────────────────────────────────────────────────
@@ -128,7 +130,7 @@ public class DriverFactory {
         caps.setCapability("appium:automationName",   "XCUITest");
         caps.setCapability("appium:browserName",      BrowserStackConfigReader.get("ios", "local", "browserName",     null, "Safari"));
         System.out.println("[DriverFactory] Connecting to local Appium for iOS...");
-        return remoteDriver(LOCAL_APPIUM_URL, caps);
+        return appiumIOSDriver(LOCAL_APPIUM_URL, caps);
     }
 
     private static RemoteWebDriver createBrowserStackIOSDriver() {
@@ -141,7 +143,7 @@ public class DriverFactory {
         bstackOptions.put("deviceName", BrowserStackConfigReader.get("ios", "bstack", "deviceName", "BSTACK_IOS_DEVICE",  "iPhone 15"));
         bstackOptions.put("osVersion",  BrowserStackConfigReader.get("ios", "bstack", "osVersion",  "BSTACK_IOS_VERSION", "17"));
         caps.setCapability("bstack:options", bstackOptions);
-        return remoteDriver(BROWSERSTACK_APPIUM_URL, caps);
+        return appiumIOSDriver(BROWSERSTACK_APPIUM_URL, caps);
     }
 
     // ── BrowserStack shared options ───────────────────────────────────────────
@@ -190,6 +192,22 @@ public class DriverFactory {
     private static RemoteWebDriver remoteDriver(String hubUrl, MutableCapabilities caps) {
         try {
             return new RemoteWebDriver(new URL(hubUrl), caps);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("[DriverFactory] Invalid hub URL: " + hubUrl, e);
+        }
+    }
+
+    private static AndroidDriver appiumAndroidDriver(String hubUrl, MutableCapabilities caps) {
+        try {
+            return new AndroidDriver(new URL(hubUrl), caps);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("[DriverFactory] Invalid hub URL: " + hubUrl, e);
+        }
+    }
+
+    private static IOSDriver appiumIOSDriver(String hubUrl, MutableCapabilities caps) {
+        try {
+            return new IOSDriver(new URL(hubUrl), caps);
         } catch (MalformedURLException e) {
             throw new RuntimeException("[DriverFactory] Invalid hub URL: " + hubUrl, e);
         }
