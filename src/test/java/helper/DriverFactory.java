@@ -2,6 +2,8 @@ package helper;
 
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
+import io.appium.java_client.service.local.AppiumDriverLocalService;
+import io.appium.java_client.service.local.AppiumServiceBuilder;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -25,7 +27,9 @@ public class DriverFactory {
     private static final String BROWSERSTACK_HUB_URL    = "https://hub-cloud.browserstack.com/wd/hub";
     private static final String BROWSERSTACK_APPIUM_URL = "https://hub-cloud.browserstack.com/wd/hub";
     private static final String LOCAL_APPIUM_URL        = "http://127.0.0.1:4723";
-
+    private static final int Local_APPIUM_PORT        = 4723;
+    private static final String Local_APPIUM_IP        = "127.0.0.1";
+    private static AppiumDriverLocalService service;
     // ── Public entry point ────────────────────────────────────────────────────
 
     /**
@@ -96,6 +100,8 @@ public class DriverFactory {
     // ── ANDROID ───────────────────────────────────────────────────────────────
 
     private static RemoteWebDriver createLocalAndroidDriver() {
+        String serverUrl = startAppiumServer();
+        checkServiceRunning();
         MutableCapabilities caps = new MutableCapabilities();
         caps.setCapability("platformName", "Android");
         caps.setCapability("appium:deviceName",      BrowserStackConfigReader.get("android", "local", "deviceName",       null, "emulator-5554"));
@@ -104,7 +110,7 @@ public class DriverFactory {
         caps.setCapability("appium:appPackage",       BrowserStackConfigReader.get("android", "local", "appPackage",       null, "org.wikipedia"));
         caps.setCapability("appium:appActivity",      BrowserStackConfigReader.get("android", "local", "appActivity",      null, "org.wikipedia.main.MainActivity"));
         System.out.println("[DriverFactory] Connecting to local Appium for Android...");
-        return appiumAndroidDriver(LOCAL_APPIUM_URL, caps);
+        return appiumAndroidDriver(serverUrl, caps);
     }
 
     private static RemoteWebDriver createBrowserStackAndroidDriver() {
@@ -227,8 +233,24 @@ public class DriverFactory {
         return "true".equalsIgnoreCase(fromYaml);
     }
 
-
     private static boolean isBlank(String v) {
         return v == null || v.trim().isEmpty();
     }
+
+    private static String startAppiumServer() {
+        service = new AppiumServiceBuilder()
+                .usingPort(Local_APPIUM_PORT)
+                .withIPAddress(Local_APPIUM_IP)
+                .build();
+        service.start();
+        return service.getUrl().toString();
+     }
+
+     private static void checkServiceRunning() {
+         if (service.isRunning()) {
+             System.out.println("Appium Server Started!");
+         } else {
+             throw new RuntimeException("Appium Server failed to start!");
+         }
+     }
 }

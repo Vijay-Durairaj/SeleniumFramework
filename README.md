@@ -32,6 +32,7 @@ One set of tests runs against **Web**, **Android**, and **iOS** — locally or o
 | **Clean interface separation** | Common, mobile-shared, Android-only, iOS-only, and web-only methods each live at the correct level |
 | **No empty stubs** | `WebPlatform` never implements mobile methods; `AndroidPlatform` never implements web methods |
 | **Platform casting helpers** | `asMobile()`, `asAndroid()`, `asIOS()`, `asWeb()` — type-safe access to platform-specific methods |
+| **Mobile gesture utilities** | `GestureUtils` provides swipe, scroll, and scroll-to-element actions for Appium drivers |
 | **Runtime platform selection** | JVM arg, env var, or YAML config |
 | **Local + BrowserStack** | Toggle with `-Drun.remote=true` |
 | **Two test entry paths** | TestNG classes and Cucumber BDD |
@@ -83,7 +84,7 @@ SeleniumFramework/
     │   │   ├── ShoppingCart.java              # Marker interface
     │   │   ├── IPlatformInterface.java        # Common contract + casting helpers
     │   │   ├── IMobilePlatform.java           # Mobile-shared methods
-    │   │   ├── Android.java                   # Android-only methods
+    │   │   ├── Android.java                   # Android-only: uninstallApplication()
     │   │   ├── IOS.java                       # iOS-only (extension point)
     │   │   └── Web.java                       # Web-only (extension point)
     │   │
@@ -112,7 +113,8 @@ SeleniumFramework/
     │   │   └── HomePage.java
     │   │
     │   └── utils/
-    │       └── TestRunner.java
+    │       ├── GestureUtils.java              # Mobile swipe/scroll gestures
+    │       └── TestRunner.java                # Cucumber JUnit runner
     │
     └── resources/
         ├── config/
@@ -129,7 +131,7 @@ SeleniumFramework/
 
 ## Interface Hierarchy
 
-Each level in the hierarchy adds only the methods that belong at that scope. A platform class implements **one** interface and gets exactly the methods it needs — nothing more.
+Each level adds only the methods that belong at that scope. A platform class implements **one** interface and gets exactly the methods it needs — nothing more.
 
 ```mermaid
 flowchart TD
@@ -170,7 +172,7 @@ flowchart TD
 | Dotted (`-.->`) | **implements** — class fulfills the interface |
 
 **Key points:**
-- `WebPlatform implements Web` → only common methods, zero mobile stubs needed
+- `WebPlatform implements Web` → only common methods, zero mobile stubs
 - `AndroidPlatform implements Android` → common + mobile-shared + Android-only
 - `iOSPlatform implements IOS` → common + mobile-shared + iOS extension point
 - `ShoppingCart` is a standalone marker interface (no methods, no parent)
@@ -193,7 +195,7 @@ flowchart TD
 
 ## How Platform Casting Works
 
-In step definitions, `platform` is typed as `IPlatformInterface`. Four default casting helpers let you reach platform-specific methods:
+In step definitions, `platform` is typed as `IPlatformInterface`. Four casting helpers let you reach platform-specific methods:
 
 ```java
 // ── Common — works on ALL platforms ──────────────────────────
@@ -259,7 +261,7 @@ Defines **what** each platform must do. Tests never depend on concrete classes.
 | Class | Implements | Driver | Status |
 |---|---|---|---|
 | `WebPlatform` | `Web` | `ChromeDriver` | ✅ Full — login, home validation, search |
-| `AndroidPlatform` | `Android` | `AndroidDriver` | ✅ Deep-link, app install/uninstall/terminate, accessibility |
+| `AndroidPlatform` | `Android` | `AndroidDriver` | ✅ Deep-link, app install/uninstall/terminate, accessibility, gestures |
 | `iOSPlatform` | `IOS` | `IOSDriver` | ⚙️ Stubs — driver wiring ready |
 
 ### `helper/` — Infrastructure
@@ -270,9 +272,34 @@ Defines **what** each platform must do. Tests never depend on concrete classes.
 | `BrowserStackConfigReader` | Loads `browserstack.yml` — priority: **JVM arg → env var → YAML → fallback** |
 | `ConfigurationHelper` | Resolves active platform (`WEB` / `ANDROID` / `IOS`) |
 | `PlatformHelper` | Factory — returns cached `IPlatformInterface` instance |
-| `DriverFactory` | Thread-safe driver creation via `ThreadLocal`. Returns `ChromeDriver`, `AndroidDriver`, or `IOSDriver` based on platform + local/remote config |
+| `DriverFactory` | Thread-safe driver creation via `ThreadLocal`. Returns `ChromeDriver`, `AndroidDriver`, or `IOSDriver` |
 | `Platforms` | Enum: `ANDROID`, `IOS`, `WEB`, `UNKNOWN` |
 | `BaseTest` + `ExtentManager` | TestNG + ExtentReports lifecycle |
+
+### `utils/` — Utilities
+
+| Class | Purpose |
+|---|---|
+| `GestureUtils` | Mobile gesture helper — swipe, scroll (up/down/left/right), scroll-to-element, scroll-inside-element. Wraps Appium `PointerInput` / `Sequence` API |
+| `TestRunner` | Cucumber JUnit runner with `@CucumberOptions` |
+
+#### `GestureUtils` methods
+
+| Method | Description |
+|---|---|
+| `scrollDown()` | Swipe from 80% → 20% of screen height |
+| `scrollUp()` | Swipe from 20% → 80% of screen height |
+| `scrollLeft()` | Swipe from 80% → 20% of screen width |
+| `scrollRight()` | Swipe from 20% → 80% of screen width |
+| `scrollToElement(By, int)` | Scroll down repeatedly until element is visible (max N scrolls) |
+| `scrollInsideElement(WebElement)` | Scroll within a specific container (e.g., RecyclerView) |
+
+`AndroidPlatform` initializes `GestureUtils` alongside the driver:
+
+```java
+driver = DriverFactory.getDriver();
+gestureUtils = new GestureUtils((AndroidDriver) driver);
+```
 
 ### `pageobjects/` — Page Object Model
 
@@ -351,7 +378,7 @@ flowchart LR
     PH --> PI{"platform?"}
 
     PI -->|web| WP["WebPlatform\nChromeDriver"]
-    PI -->|android| AP["AndroidPlatform\nAndroidDriver"]
+    PI -->|android| AP["AndroidPlatform\nAndroidDriver\n+ GestureUtils"]
     PI -->|ios| IP["iOSPlatform\nIOSDriver"]
 
     WP --> RT{"run.remote?"}
@@ -535,3 +562,4 @@ mvn test -Dplatform=android -Drun.remote=true
 - Page objects for iOS need to be created under `pageobjects/ios/`
 - `ShoppingCart` is an empty marker interface — no cart-specific actions defined yet
 - `BaseTest` / `ExtentManager` are wired for TestNG only; Cucumber uses its own reporter plugins
+- `GestureUtils` is currently used only by `AndroidPlatform`; can be extended to `iOSPlatform` in future

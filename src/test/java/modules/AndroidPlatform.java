@@ -8,7 +8,7 @@ import io.appium.java_client.android.AndroidDriver;
 import model.User;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import pageobjects.android.TestMobileHomePage;
-
+import utils.GestureUtils;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,11 +16,13 @@ public class AndroidPlatform implements Android {
 
     protected RemoteWebDriver driver;
     TestMobileHomePage homePage;
+    GestureUtils gestureUtils;
 
     private RemoteWebDriver getDriver() {
         if (driver == null) {
             driver = DriverFactory.getDriver();
             homePage = new TestMobileHomePage(driver);
+            gestureUtils = new GestureUtils((AndroidDriver) driver);
         }
         return driver;
     }
@@ -38,7 +40,6 @@ public class AndroidPlatform implements Android {
 
     @Override
     public void searchForKeyword(String keyword) {
-        // TODO: implement Android search
         getDriver();
     }
 

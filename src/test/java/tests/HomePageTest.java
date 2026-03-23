@@ -4,7 +4,7 @@ import helper.ConfigReader;
 import org.testng.annotations.Test;
 import stepdefinitions.AbstractStepDefinitions;
 
-public class HomePage extends AbstractStepDefinitions {
+public class HomePageTest extends AbstractStepDefinitions {
 
     @Test
     public void searchKeywordTest() {
