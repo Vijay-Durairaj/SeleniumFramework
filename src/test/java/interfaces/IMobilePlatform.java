@@ -1,5 +1,8 @@
 package interfaces;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Mobile-only contract — extends IPlatformInterface with mobile-specific methods.
  * Android and IOS extend this interface.
@@ -12,5 +15,8 @@ public interface IMobilePlatform extends IPlatformInterface {
     void validateAccessibilityTab();
     void installApplication(String appPath);
     void terminateApplication(String appPackage);
-
+    void interceptApi();
+    void mockAPI();
+    List<Map> getApiResponse();
+    void stopInterceptApi();
 }

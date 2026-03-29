@@ -6,10 +6,12 @@ import interfaces.Android;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import model.User;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import pageobjects.android.TestMobileHomePage;
 import utils.GestureUtils;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AndroidPlatform implements Android {
@@ -86,6 +88,26 @@ public class AndroidPlatform implements Android {
     @Override
     public void terminateApplication(String appPath) {
         ((AndroidDriver) getDriver()).terminateApp(appPath);
+    }
+
+    @Override
+    public void interceptApi() {
+        ((JavascriptExecutor) getDriver()).executeScript("interceptor:startListening");
+    }
+
+    @Override
+    public void mockAPI() {
+        ((JavascriptExecutor) getDriver()).executeScript("interceptor:addMock", new HashMap<>());
+    }
+
+    @Override
+    public List<Map> getApiResponse() {
+        List<Map> request = (List<Map>)((JavascriptExecutor) getDriver()).executeScript("interceptor:getApiResponse");
+        return request;
+    }
+
+    public void stopInterceptApi() {
+        ((JavascriptExecutor) getDriver()).executeScript("interceptor:stopListening");
     }
 
     @Override

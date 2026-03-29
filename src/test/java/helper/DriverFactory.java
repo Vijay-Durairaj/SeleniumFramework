@@ -4,7 +4,7 @@ import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.service.local.AppiumDriverLocalService;
 import io.appium.java_client.service.local.AppiumServiceBuilder;
-import io.github.bonigarcia.wdm.WebDriverManager;
+import io.appium.java_client.service.local.flags.GeneralServerFlag;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -72,7 +72,7 @@ public class DriverFactory {
     // ── WEB ───────────────────────────────────────────────────────────────────
 
     private static RemoteWebDriver createLocalWebDriver() {
-        WebDriverManager.chromedriver().setup();
+       // WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
@@ -109,6 +109,7 @@ public class DriverFactory {
         caps.setCapability("appium:automationName",   "UiAutomator2");
         caps.setCapability("appium:appPackage",       BrowserStackConfigReader.get("android", "local", "appPackage",       null, "org.wikipedia"));
         caps.setCapability("appium:appActivity",      BrowserStackConfigReader.get("android", "local", "appActivity",      null, "org.wikipedia.main.MainActivity"));
+        caps.setCapability("appium.intercept", "true"); // Enable network interception for Android 13+ emulators
         System.out.println("[DriverFactory] Connecting to local Appium for Android...");
         return appiumAndroidDriver(serverUrl, caps);
     }
@@ -241,6 +242,7 @@ public class DriverFactory {
         service = new AppiumServiceBuilder()
                 .usingPort(Local_APPIUM_PORT)
                 .withIPAddress(Local_APPIUM_IP)
+                .withArgument(GeneralServerFlag.USE_PLUGINS, "appium-interceptor")
                 .build();
         service.start();
         return service.getUrl().toString();

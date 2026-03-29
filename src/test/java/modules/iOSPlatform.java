@@ -5,6 +5,9 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import helper.DriverFactory;
 import interfaces.IOS;
 
+import java.util.List;
+import java.util.Map;
+
 public class iOSPlatform implements IOS {
 
     protected RemoteWebDriver driver;
@@ -43,6 +46,26 @@ public class iOSPlatform implements IOS {
 
     @Override
     public void terminateApplication(String appPath) {
+
+    }
+
+    @Override
+    public void interceptApi() {
+
+    }
+
+    @Override
+    public void mockAPI() {
+
+    }
+
+    @Override
+    public List<Map> getApiResponse() {
+        return List.of();
+    }
+
+    @Override
+    public void stopInterceptApi() {
 
     }
 
