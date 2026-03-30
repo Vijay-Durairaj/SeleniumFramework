@@ -97,17 +97,27 @@ public class AndroidPlatform implements Android {
 
     @Override
     public void mockAPI() {
-        ((JavascriptExecutor) getDriver()).executeScript("interceptor:addMock", new HashMap<>());
+        Map<String, Object> mockRule = new HashMap<>();
+        mockRule.put("url", "https://api.example.com/login");
+        mockRule.put("statusCode", 401);          // Pretend server said "Unauthorized"
+        mockRule.put("body", "{\"error\": \"Invalid credentials\"}");
+        Object id = ((JavascriptExecutor) getDriver()).executeScript("interceptor:addMock", mockRule);
     }
 
     @Override
     public List<Map> getApiResponse() {
-        List<Map> request = (List<Map>)((JavascriptExecutor) getDriver()).executeScript("interceptor:getApiResponse");
-        return request;
+        try{
+            List<Map> request = (List<Map>)((JavascriptExecutor)getDriver()).executeScript("interceptor:getApiResponse");
+            return request;
+        }catch(Exception e){
+            System.out.println("No API calls captured yet.");
+            return null;
+        }
     }
 
     public void stopInterceptApi() {
-        ((JavascriptExecutor) getDriver()).executeScript("interceptor:stopListening");
+        ((JavascriptExecutor)getDriver()).executeScript("interceptor: clearMockResponses");
+        ((JavascriptExecutor)getDriver()).executeScript("interceptor:stopListening");
     }
 
     @Override
